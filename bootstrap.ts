@@ -1,9 +1,8 @@
-import {EndpointManager} from './src/endpoint-manager';
+/* eslint-disable @typescript-eslint/no-empty-function */
 
-declare const Zotero: any;
-// declare const Components: any;
-// declare const Services: any;
-// Components.utils.import('resource://gre/modules/Services.jsm');
+declare const Services: any;
+declare const Components: any;
+Components.utils.import('resource://gre/modules/Services.jsm');
 
 enum Reason {
 	APP_STARTUP     = 1, // The application is starting up.
@@ -33,32 +32,62 @@ function patch(object, method, patcher) {
 }
 
 class ZoteroApiEndpoint {
-	endpointManager: EndpointManager;
-
-	public async install(_data: BootstrapData, _reason: Reason) {
-		await Zotero.Schema.schemaUpdatePromise;
+	public install(_data: BootstrapData, _reason: Reason) {
+		// await Zotero.Schema.schemaUpdatePromise;
 	}
 
-	public async uninstall(_data: BootstrapData, _reason: Reason) {
-		await Zotero.Schema.schemaUpdatePromise;
+	public uninstall(_data: BootstrapData, _reason: Reason) {
+		// await Zotero.Schema.schemaUpdatePromise;
 	}
 
 	public async startup(_data: BootstrapData, _reason: Reason) {
-		await Zotero.Schema.schemaUpdatePromise;
-		this.endpointManager = new EndpointManager();
-		this.endpointManager.addEndpoints();
+		const window = await this.waitForWindow() as {Zotero: any};
+
+		/* eslint-disable no-console */
+		console.log(`Now that the window has loaded, we can access Zotero: ${window.Zotero}`);
+		// If we load a module as a subscript, it will have access to Zotero as a global variable
+		Services.scriptloader.loadSubScript('chrome://zotero-api-endpoint/content/endpoint-manager.js', window);
 	}
 
-	public async shutdown(_data: BootstrapData, _reason: Reason) {
-		await Zotero.Schema.schemaUpdatePromise;
-		this.endpointManager.removeEndpoints();
+	async waitForWindow() {
+		return new Promise( resolve => {
+			// Check if window is already loaded
+			const windows = Services.wm.getEnumerator('navigator:browser');
+			while (windows.hasMoreElements()) {
+				resolve(windows.getNext());
+			}
+			// If not, add a listener for when the window does load
+			const windowListener = {
+				onOpenWindow: xulWindow => {
+					// Wait for the window to finish loading
+					const domWindow = xulWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).getInterface(Components.interfaces.nsIDOMWindow);
+
+					// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+					domWindow.addEventListener('load', function listener() {
+						domWindow.removeEventListener('load', listener, false);
+						if (domWindow.document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
+							resolve(domWindow);
+						}
+					}, false);
+				},
+				onCloseWindow: _xulWindow => {},
+				onWindowTitleChange: (_xulWindow, _newTitle) => {},
+			};
+
+			// Add listener to load scripts in windows opened in the future
+			Services.wm.addListener(windowListener);
+		});
+	}
+
+	public shutdown(_data: BootstrapData, _reason: Reason) {
+		// await Zotero.Schema.schemaUpdatePromise;
 	}
 
 }
 
-Zotero.ApiEndpoint = new ZoteroApiEndpoint;
+const ApiEndpoint = new ZoteroApiEndpoint;
 
-export const install = Zotero.ApiEndpoint.install.bind(Zotero.ApiEndpoint);
-export const uninstall = Zotero.ApiEndpoint.uninstall.bind(Zotero.ApiEndpoint);
-export const startup = Zotero.ApiEndpoint.startup.bind(Zotero.ApiEndpoint);
-export const shutdown = Zotero.ApiEndpoint.shutdown.bind(Zotero.ApiEndpoint);
+export const install = ApiEndpoint.install.bind(ApiEndpoint);
+export const uninstall = ApiEndpoint.uninstall.bind(ApiEndpoint);
+export const startup = ApiEndpoint.startup.bind(ApiEndpoint);
+export const shutdown = ApiEndpoint.shutdown.bind(ApiEndpoint);

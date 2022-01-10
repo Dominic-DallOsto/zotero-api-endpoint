@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 declare const Zotero: any;
 declare const ZoteroPane: any;
 
@@ -17,7 +18,7 @@ enum HTTP_METHOD {
 export class EndpointManager{
 	private endpoints = [];
 
-	public addEndpoints() :void{
+	public addEndpoints():void{
 		this.addEndpoint('/zotero-api-endpoint/get-libraries', [HTTP_METHOD.GET], getLibraries);
 		this.addEndpoint('/zotero-api-endpoint/get-selection', [HTTP_METHOD.GET], getSelection);
 		this.addEndpoint('/zotero-api-endpoint/search-library', [HTTP_METHOD.POST], searchLibrary);
@@ -26,13 +27,16 @@ export class EndpointManager{
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
-		endpointFunction: (data: object, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) => void|Promise<void>){
+		endpointFunction: (data: any, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) => void|Promise<void>){
 		this.endpoints.push(endpointName);
 
-		Zotero.Server.Endpoints[endpointName] = () => ({
-			supportedMethods,
-			init: endpointFunction,
-		});
+		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+		Zotero.Server.Endpoints[endpointName] = function() {
+			return{
+				supportedMethods,
+				init: endpointFunction,
+			};
+		};
 	}
 
 	public removeEndpoints(): void{
@@ -40,6 +44,7 @@ export class EndpointManager{
 			delete Zotero.Server.Endpoints[endpointName];
 		});
 	}
+
 }
 
 /**
@@ -81,7 +86,7 @@ function validatePostData(args: {[key:string]:any}, argsValidatorMap: {[key:stri
  * ]
  * ```
  */
-function getLibraries(data: object, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
+function getLibraries(_: object, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
 	try {
 		const libraryData = Zotero.Libraries.getAll().map(library => ({
 			libraryID: library.libraryID,
@@ -152,7 +157,7 @@ function getSelection(data: object, sendResponseCallback: (status: HTTP_STATUS, 
 async function searchLibrary(data: {libraryID:number, query:object, resultType:'items'|'keys'|'hits'},
 	sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
 	try {
-		validatePostData(data, {
+		this.validatePostData(data, {
 			libraryID: val => typeof val == 'number' && Number.isInteger(val),
 			query: val => typeof val === 'object' && Object.entries(val as object).length > 0,
 			resultType: val => typeof val === 'string' && ['items', 'keys', 'hits'].includes(val),
@@ -196,7 +201,7 @@ async function searchLibrary(data: {libraryID:number, query:object, resultType:'
 async function createItems(data: {libraryID:number, collections:string[], items:object[]|string},
 	sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
 	try {
-		validatePostData(data, {
+		this.validatePostData(data, {
 			libraryID: val => typeof val == 'number' && Number.isInteger(val),
 			collections: val => val === null || Array.isArray(val),
 			items: val => val && typeof val == 'string' || Array.isArray(val) && val.length > 0,
@@ -286,7 +291,7 @@ async function createItems(data: {libraryID:number, collections:string[], items:
  */
 async function getItemAttachments(data: {libraryID:number, keys:string[]}, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
 	try {
-		validatePostData(data, {
+		this.validatePostData(data, {
 			libraryID: val => typeof val == 'number' && Number.isInteger(val),
 			keys: val => Array.isArray(val) && val.length > 0,
 		}, 'libraryID: int, keys: string[]');
@@ -313,3 +318,6 @@ async function getItemAttachments(data: {libraryID:number, keys:string[]}, sendR
 		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
 	}
 }
+
+const endpointManager = new EndpointManager();
+endpointManager.addEndpoints();

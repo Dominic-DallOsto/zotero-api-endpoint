@@ -11,7 +11,7 @@ async function build() {
     bundle: true,
     format: 'iife',
     target: ['firefox60'],
-    entryPoints: [ 'bootstrap.ts' ],
+    entryPoints: [ 'bootstrap.ts', 'content/endpoint-manager.ts'],
     outdir: 'build',
     globalName: 'install__startup__shutdown__uninstall',
     footer: { js: 'var { install, startup, shutdown, uninstall } = install__startup__shutdown__uninstall;' },
