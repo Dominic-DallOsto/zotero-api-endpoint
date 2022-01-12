@@ -3,17 +3,28 @@ declare const Zotero: any;
 declare const ZoteroPane: any;
 
 enum HTTP_STATUS{
-	OK				= 200,
-	SERVER_ERROR	= 500,
-	NOT_FOUND		= 404,
-	CONFLICT		= 409,
-	BAD_REQUEST		= 400,
+	OK              = 200,
+	SERVER_ERROR    = 500,
+	NOT_FOUND       = 404,
+	CONFLICT        = 409,
+	BAD_REQUEST     = 400,
 }
 
 enum HTTP_METHOD {
 	GET = 'GET',
 	POST = 'POST',
 }
+
+enum MIME_TYPE {
+	TEXT = 'text/plain',
+	JSON = 'application/json'
+}
+
+type ZoteroItem = {
+	[key:string]: string|object
+};
+
+type ResponseCallback = (status: HTTP_STATUS, type: MIME_TYPE, message: string) => void;
 
 export class EndpointManager{
 	private endpoints = [];
@@ -23,18 +34,30 @@ export class EndpointManager{
 		this.addEndpoint('/zotero-api-endpoint/get-selection', [HTTP_METHOD.GET], getSelection);
 		this.addEndpoint('/zotero-api-endpoint/search-library', [HTTP_METHOD.POST], searchLibrary);
 		this.addEndpoint('/zotero-api-endpoint/create-items', [HTTP_METHOD.POST], createItems);
-		this.addEndpoint('/zotero-api-endpoint/create-items', [HTTP_METHOD.POST], getItemAttachments);
+		this.addEndpoint('/zotero-api-endpoint/get-item-attachments', [HTTP_METHOD.POST], getItemAttachments);
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
-		endpointFunction: (data: any, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) => void|Promise<void>){
+		endpointFunction: (data) => Promise<any> | any){
 		this.endpoints.push(endpointName);
 
 		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 		Zotero.Server.Endpoints[endpointName] = function() {
 			return{
 				supportedMethods,
-				init: endpointFunction,
+				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
+					try {
+						const result = await endpointFunction(data);
+						sendResponseCallback(HTTP_STATUS.OK, MIME_TYPE.JSON, JSON.stringify(result));
+					}
+					catch (e) {
+						// could return more error info with a debug switch
+						const result = {
+							error: e.message,
+						};
+						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
+					}
+				},
 			};
 		};
 	}
@@ -44,17 +67,20 @@ export class EndpointManager{
 			delete Zotero.Server.Endpoints[endpointName];
 		});
 	}
-
 }
 
+
+
 /**
-	 * Validates JSON POST object against a validation map of validator functions.
-	 * Unless the validation functions returns true, an error is thrown.
-	 * @param {{[key:string]:any}} args
-	 * @param {{[key:string]:function}} argsValidatorMap
-	 * @param {string?} msg Optional informational message about the required value type
-	 */
-function validatePostData(args: {[key:string]:any}, argsValidatorMap: {[key:string]:Function}, msg = '') {
+ * Validates JSON POST object against a validation map of validator functions.
+ * Unless the validation functions returns true, an error is thrown.
+ * @param {{[key:string]:any}} args
+ * @param {{[key:string]:function}} argsValidatorMap
+ * @param {string?} msg Optional informational message about the required value type
+ */
+function validatePostData(args: {[key:string]:any},
+	argsValidatorMap: {[key:string]:(val:any) => boolean},
+	msg = '') {
 	for (const [argName, argValidator] of Object.entries(argsValidatorMap)) {
 		let errMsg: string;
 		if (args[argName] === undefined) {
@@ -77,6 +103,13 @@ function validatePostData(args: {[key:string]:any}, argsValidatorMap: {[key:stri
 	}
 }
 
+interface LibrariesResponse {
+	libraryID: number
+	libraryType: string
+	groupID: number
+	groupName: string
+}
+
 /**
  * Returns an array with data on the accessible libraries, e.g.
  * ```
@@ -86,60 +119,61 @@ function validatePostData(args: {[key:string]:any}, argsValidatorMap: {[key:stri
  * ]
  * ```
  */
-function getLibraries(_: object, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
-	try {
-		const libraryData = Zotero.Libraries.getAll().map(library => ({
-			libraryID: library.libraryID,
-			libraryType: library.libraryType,
-			groupID: library.groupID,
-			groupName: library.groupName,
-		}));
-		sendResponseCallback(HTTP_STATUS.OK, 'application/json', JSON.stringify(libraryData));
-	}
-	catch (error) {
-		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
-	}
+function getLibraries(_: object) : LibrariesResponse {
+	return Zotero.Libraries.getAll().map(library => ({
+		libraryID: library.libraryID,
+		libraryType: library.libraryType,
+		groupID: library.groupID,
+		groupName: library.groupName,
+	})) as  LibrariesResponse;
 }
 
+interface SelectionResponse {
+	libraryID: number
+	groupID: number
+	selectedItems: ZoteroItem[]
+	collection: string
+	childItems: ZoteroItem[]
+}
 
 /**
- * Returns information on the current selection in Zotero, to allow to control the state of,
- * and input data for, external programs that interact with cita data.
- * Returns a map `{libraryID:int|null, collection: {}|null, selectedItems: {}[]}, childItems: {}[]}`
- * containing the libraryID, the item data of the selected collection and the contained
- * child items, and/or the individually selected items.
+ * Returns information on the current selection in Zotero.
  */
-function getSelection(data: object, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
-	try {
-		const selectedItems = ZoteroPane.getSelectedItems();
-		const collection = ZoteroPane.getSelectedCollection() || null;
-		const childItems = collection? collection.getChildItems() : [];
-		// How can I get the id independently of the selected collection/items?
-		let libraryID = null;
-		if (selectedItems.length) {
-			libraryID = selectedItems[0].library.id;
-		}
-		else if (collection) {
-			libraryID = collection.library.id;
-		}
-		const result = {
-			libraryID,
-			selectedItems,
-			collection,
-			childItems,
-		};
-		sendResponseCallback(HTTP_STATUS.OK, 'application/json', JSON.stringify(result));
+function getSelection(_: object): SelectionResponse {
+	const selectedItems = ZoteroPane.getSelectedItems();
+	const collection = ZoteroPane.getSelectedCollection() || null;
+	const childItems = collection && selectedItems.length === 0 ? collection.getChildItems() : [];
+	let libraryID = null;
+	let groupID = null;
+	if (selectedItems.length) {
+		libraryID = selectedItems[0].library.libraryID;
+		groupID = selectedItems[0].library.groupID;
 	}
-	catch (error) {
-		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
+	else if (collection) {
+		libraryID = collection.library.libraryID;
+		groupID = collection.library.groupID;
 	}
+	return {
+		libraryID,
+		groupID,
+		selectedItems,
+		collection,
+		childItems,
+	};
 }
+
+type SearchRequest = {
+	libraryID:number
+	query: object
+	resultType:'items'|'keys'|'hits'
+};
+
+type SearchResponse = ZoteroItem[] | string[] | string;
 
 /**
  * Searches a given library with a set of given conditions (see
  * https://www.zotero.org/support/dev/client_coding/javascript_api#executing_the_search) so that
- * an external program can check wether citing or cited references exist or need to be created.
- * Expect POST data containing a JSON object with properties `libraryID`, `query`, and `resultType`.
+ * an external program can check whether citing or cited references exist or need to be created.
  * Depending on `resultType` return either an array of "items" matching the query,
  * an array of item "keys" or the number of "hits".
  * Example POST data:
@@ -154,40 +188,38 @@ function getSelection(data: object, sendResponseCallback: (status: HTTP_STATUS, 
  * }
  * ```
  */
-async function searchLibrary(data: {libraryID:number, query:object, resultType:'items'|'keys'|'hits'},
-	sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
-	try {
-		this.validatePostData(data, {
-			libraryID: val => typeof val == 'number' && Number.isInteger(val),
-			query: val => typeof val === 'object' && Object.entries(val as object).length > 0,
-			resultType: val => typeof val === 'string' && ['items', 'keys', 'hits'].includes(val),
-		}, "libraryID (int), query (object), resultType ('items|keys|hits')");
-
-		const {libraryID, query, resultType} = data;
-		const search = new Zotero.Search();
-		search.libraryID = libraryID;
-		for (let [field, conditions] of Object.entries(query)) {
-			if (!Array.isArray(conditions)) {
-				conditions = [conditions];
-			}
-			conditions.unshift(field);
-			search.addCondition(...conditions);
+async function searchLibrary(data: SearchRequest): Promise<SearchResponse> {
+	validatePostData(data, {
+		libraryID: val => typeof val == 'number' && Number.isInteger(val),
+		query: val => typeof val === 'object' && Object.entries(val as object).length > 0,
+		resultType: val => typeof val === 'string' && ['items', 'keys', 'hits'].includes(val),
+	}, "libraryID (int), query (object), resultType ('items|keys|hits')");
+	const {libraryID, query, resultType} = data;
+	const search = new Zotero.Search();
+	search.libraryID = libraryID;
+	for (let [field, conditions] of Object.entries(query)) {
+		if (!Array.isArray(conditions)) {
+			conditions = [conditions];
 		}
-		const results = await search.search();
-		if (resultType === 'hits') {
-			sendResponseCallback(HTTP_STATUS.OK, 'application/json', String(results.length));
-			return;
-		}
-		let items = await Zotero.Items.getAsync(results);
-		if (resultType === 'keys') {
-			items = items.map(item => item.key as string);
-		}
-		sendResponseCallback(HTTP_STATUS.OK, 'application/json', JSON.stringify(items));
+		conditions.unshift(field);
+		search.addCondition(...conditions);
 	}
-	catch (error) {
-		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
+	const results = await search.search();
+	if (resultType === 'hits') {
+		return String(results.length);
 	}
+	let items = await Zotero.Items.getAsync(results);
+	if (resultType === 'keys') {
+		items = items.map(item => item.key as string);
+	}
+	return items as SearchResponse;
 }
+
+type CreateItemRequest = {
+	libraryID:number
+	collections:string[]
+	items:object[]|string
+};
 
 /**
  * Create or more items in the given library which can later be linked.
@@ -198,89 +230,93 @@ async function searchLibrary(data: {libraryID:number, query:object, resultType:'
  * or more items in a format that can be recognized and translated by Zotero.
  * Returns the keys of the created items
  */
-async function createItems(data: {libraryID:number, collections:string[], items:object[]|string},
-	sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
-	try {
-		this.validatePostData(data, {
-			libraryID: val => typeof val == 'number' && Number.isInteger(val),
-			collections: val => val === null || Array.isArray(val),
-			items: val => val && typeof val == 'string' || Array.isArray(val) && val.length > 0,
-		}, 'libraryID: int, collections: array|null, items: object[]|string');
-
-		const {libraryID, collections, items} = data;
-
-		let zoteroItems: {key: string}[];
-
-		if (items[0] && typeof items[0] == 'object' && 'itemType' in items[0]) {
-			// items in Zotero-JSON
-			const itemIds = [];
-			for (const itemData of items as {itemType:string}[]) {
-				const item = new Zotero.Item(itemData.itemType);
-				item.libraryID = libraryID;
-				for (let [key, value] of Object.entries(itemData)) {
-					switch (key) {
-						case 'itemType':
-						case 'key':
-						case 'version':
-							// ignore
-							break;
-						case 'creators':
-							item.setCreators(value);
-							break;
-						case 'tags':
-							item.setTags(value);
-							break;
-						case 'collections':
-							if (collections) {
-								// if collection id is given, add to existing ones
-								// fix: is this a string or an array of strings?
-								value = value.concat(collections[0]);
-							}
-							item.setCollections(value);
-							break;
-						case 'relations':
-							item.setRelations(value);
-							break;
-						default:
-							item.setField(key, value);
-					}
+async function createItems(data: CreateItemRequest):Promise<string[]> {
+	validatePostData(data, {
+		libraryID: val => typeof val == 'number' && Number.isInteger(val),
+		collections: val => val === null || Array.isArray(val),
+		items: val => val && typeof val == 'string' || Array.isArray(val) && val.length > 0,
+	}, 'libraryID: int, collections: array|null, items: object[]|string');
+	const {libraryID, collections, items} = data;
+	let zoteroItems: ZoteroItem[];
+	if (items[0] && typeof items[0] == 'object' && 'itemType' in items[0]) {
+		// items in Zotero-JSON
+		const itemIds = [];
+		for (const itemData of items as {itemType:string}[]) {
+			const item = new Zotero.Item(itemData.itemType);
+			item.libraryID = libraryID;
+			for (let [key, value] of Object.entries(itemData)) {
+				switch (key) {
+					case 'itemType':
+					case 'key':
+					case 'version':
+						// ignore
+						break;
+					case 'creators':
+						item.setCreators(value);
+						break;
+					case 'tags':
+						item.setTags(value);
+						break;
+					case 'collections':
+						if (collections) {
+							// if collection id is given, add to existing ones
+							// fix: is this a string or an array of strings?
+							value = value.concat(collections[0]);
+						}
+						item.setCollections(value);
+						break;
+					case 'relations':
+						item.setRelations(value);
+						break;
+					default:
+						item.setField(key, value);
 				}
-				const itemID = await item.saveTx();
-				itemIds.push(itemID);
 			}
-			zoteroItems = await Zotero.Items.getAsync(itemIds);
+			const itemID = await item.saveTx();
+			itemIds.push(itemID);
 		}
-		else if (typeof items == 'string') {
-			// Import items via translators
-			// adapted from https://github.com/zotero/zotero/blob/master/chrome/content/zotero/xpcom/connector/server_connector.js#L1416
-			await Zotero.Schema.schemaUpdatePromise;
-			const translate = new Zotero.Translate.Import();
-			translate.setString(items);
-			const translators = await translate.getTranslators();
-			if (!translators || !translators.length) {
-				throw new Error('No translator could be found for input data.');
-			}
-			translate.setTranslator(translators[0]);
-			zoteroItems = await translate.translate({
-				libraryID,
-				collections,
-				forceTagType: 1,
-				// Import translation skips selection by default, so force it to occur
-				saveOptions: {
-					skipSelect: false,
-				},
-			});
-		}
-		else {
-			throw new Error('Invalid items data');
-		}
-		const itemKeys = zoteroItems.map(item => item.key);
-		sendResponseCallback(HTTP_STATUS.OK, 'application/json', JSON.stringify(itemKeys));
+		zoteroItems = await Zotero.Items.getAsync(itemIds);
 	}
-	catch (error) {
-		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
+	else if (typeof items == 'string') {
+		// Import items via translators
+		// adapted from https://github.com/zotero/zotero/blob/master/chrome/content/zotero/xpcom/connector/server_connector.js#L1416
+		await Zotero.Schema.schemaUpdatePromise;
+		const translate = new Zotero.Translate.Import();
+		translate.setString(items);
+		const translators = await translate.getTranslators();
+		if (!translators || !translators.length) {
+			throw new Error('No translator could be found for input data.');
+		}
+		translate.setTranslator(translators[0]);
+		zoteroItems = await translate.translate({
+			libraryID,
+			collections,
+			forceTagType: 1,
+			// Import translation skips selection by default, so force it to occur
+			saveOptions: {
+				skipSelect: false,
+			},
+		});
 	}
+	else {
+		throw new Error('Invalid items data');
+	}
+	return zoteroItems.map(item => item.key as string);
 }
+
+
+type ItemAttachmentsRequest =  {
+	libraryID:number
+	keys:string[]
+};
+
+type ZoteroItemWithFilePath = ZoteroItem & {
+	filepath?: string
+};
+
+type ItemAttachmentsResponse = {
+	[key: string]: ZoteroItemWithFilePath
+};
 
 /**
  * Return the item data of the attachments of items identified by their key, with the
@@ -289,34 +325,28 @@ async function createItems(data: {libraryID:number, collections:string[], items:
  * Expects POST data containing an object with properties `libraryID` and `keys`. Returns  a map of
  * keys and attachment item data.
  */
-async function getItemAttachments(data: {libraryID:number, keys:string[]}, sendResponseCallback: (status: HTTP_STATUS, type: string, message: string) => void) {
-	try {
-		this.validatePostData(data, {
-			libraryID: val => typeof val == 'number' && Number.isInteger(val),
-			keys: val => Array.isArray(val) && val.length > 0,
-		}, 'libraryID: int, keys: string[]');
-
-		const {libraryID, keys} = data;
-		const attachments = {};
-		for (const key of keys) {
-			const item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
-			if (!item) {
-				throw new Error(`No item with key ${key} exists.`);
-			}
-			attachments[key] = item.getAttachments().map(id => {
-				const attachment = Zotero.Items.get(id);
-				const result = attachment.toJSON();
-				if (attachment.isFileAttachment()) {
-					result.filepath = attachment.getFilePath();
-				}
-				return result as string;
-			});
+async function getItemAttachments(data: ItemAttachmentsRequest): Promise<ItemAttachmentsResponse> {
+	validatePostData(data, {
+		libraryID: val => typeof val == 'number' && Number.isInteger(val),
+		keys: val => Array.isArray(val) && val.length > 0,
+	}, 'libraryID: int, keys: string[]');
+	const {libraryID, keys} = data;
+	const attachmentsMap: ItemAttachmentsResponse = {};
+	for (const key of keys) {
+		const item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
+		if (!item) {
+			throw new Error(`No item with key ${key} exists.`);
 		}
-		sendResponseCallback(HTTP_STATUS.OK, 'application/json', JSON.stringify(attachments));
+		attachmentsMap[key] = item.getAttachments().map(id => {
+			const attachment = Zotero.Items.get(id);
+			const result = attachment.toJSON();
+			if (attachment.isFileAttachment()) {
+				result.filepath = attachment.getFilePath();
+			}
+			return result as string;
+		});
 	}
-	catch (error) {
-		sendResponseCallback(HTTP_STATUS.SERVER_ERROR, 'text/plain', `Error occurred:\n${error}`);
-	}
+	return attachmentsMap;
 }
 
 const endpointManager = new EndpointManager();
