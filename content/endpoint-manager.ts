@@ -140,7 +140,7 @@ interface SelectionResponse {
  * Returns information on the current selection in Zotero.
  */
 function getSelection(_: object): SelectionResponse {
-	const selectedItems = ZoteroPane.getSelectedItems();
+	let selectedItems = ZoteroPane.getSelectedItems();
 	const collection = ZoteroPane.getSelectedCollection() || null;
 	const childItems = collection && selectedItems.length === 0 ? collection.getChildItems() : [];
 	let libraryID = null;
@@ -148,6 +148,13 @@ function getSelection(_: object): SelectionResponse {
 	if (selectedItems.length) {
 		libraryID = selectedItems[0].library.libraryID;
 		groupID = selectedItems[0].library.groupID;
+		selectedItems = selectedItems.map(item => {
+			const data = item.toJSON();
+			if (item.isFileAttachment()) {
+				data.filepath = item.getFilePath();
+			}
+			return data as ZoteroItem;
+		});
 	}
 	else if (collection) {
 		libraryID = collection.library.libraryID;
