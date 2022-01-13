@@ -104,20 +104,13 @@ function validatePostData(args: { [key: string]: any },
 }
 
 /**
- * returns the path of the attachment, downloading it if it doesn't exist
- * @param item
+ * Returns the path of the attachment, downloading it if it doesn't exist
  */
-async function getAttachmentPath(item): Promise<string> {
+async function getAttachmentPath(item: any): Promise<string> {
 	let filepath = item.getFilePath() as string;
 	if (!filepath || OS.File.exists(filepath)) {
-		try {
-			await Zotero.Sync.Runner.downloadFile(item);
-			filepath = item.getFilePath() as string;
-		}
-		catch (e) {
-			alert(e.message);
-			return '';
-		}
+		await Zotero.Sync.Runner.downloadFile(item);
+		filepath = item.getFilePath() as string;
 	}
 	return filepath;
 }
