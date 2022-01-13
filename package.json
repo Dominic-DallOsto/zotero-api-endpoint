@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "description": "Provides an HTTP server endpoint for interacting with Zotero",
   "scripts": {
-    "lint": "eslint . --ext .ts --cache --cache-location .eslintcache/",
+    "lint": "eslint . --ext .ts --fix --cache --cache-location .eslintcache/",
     "prebuild": "npm run lint",
     "build": "tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-api-endpoint",
