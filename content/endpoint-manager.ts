@@ -1,13 +1,14 @@
 /* eslint-disable @typescript-eslint/unbound-method */
 declare const Zotero: any;
 declare const ZoteroPane: any;
+declare const OS: any;
 
-enum HTTP_STATUS{
-	OK              = 200,
-	SERVER_ERROR    = 500,
-	NOT_FOUND       = 404,
-	CONFLICT        = 409,
-	BAD_REQUEST     = 400,
+enum HTTP_STATUS {
+	OK = 200,
+	SERVER_ERROR = 500,
+	NOT_FOUND = 404,
+	CONFLICT = 409,
+	BAD_REQUEST = 400,
 }
 
 enum HTTP_METHOD {
@@ -21,15 +22,15 @@ enum MIME_TYPE {
 }
 
 type ZoteroItem = {
-	[key:string]: string|object
+	[key: string]: string | object
 };
 
 type ResponseCallback = (status: HTTP_STATUS, type: MIME_TYPE, message: string) => void;
 
-export class EndpointManager{
+export class EndpointManager {
 	private endpoints = [];
 
-	public addEndpoints():void{
+	public addEndpoints(): void {
 		this.addEndpoint('/zotero-api-endpoint/get-libraries', [HTTP_METHOD.GET], getLibraries);
 		this.addEndpoint('/zotero-api-endpoint/get-selection', [HTTP_METHOD.GET], getSelection);
 		this.addEndpoint('/zotero-api-endpoint/search-library', [HTTP_METHOD.POST], searchLibrary);
@@ -38,12 +39,12 @@ export class EndpointManager{
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
-		endpointFunction: (data) => Promise<any> | any){
+		endpointFunction: (data) => Promise<any> | any) {
 		this.endpoints.push(endpointName);
 
 		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 		Zotero.Server.Endpoints[endpointName] = function() {
-			return{
+			return {
 				supportedMethods,
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
 					try {
@@ -62,13 +63,12 @@ export class EndpointManager{
 		};
 	}
 
-	public removeEndpoints(): void{
+	public removeEndpoints(): void {
 		this.endpoints.forEach(endpointName => {
 			delete Zotero.Server.Endpoints[endpointName];
 		});
 	}
 }
-
 
 
 /**
@@ -78,8 +78,8 @@ export class EndpointManager{
  * @param {{[key:string]:function}} argsValidatorMap
  * @param {string?} msg Optional informational message about the required value type
  */
-function validatePostData(args: {[key:string]:any},
-	argsValidatorMap: {[key:string]:(val:any) => boolean},
+function validatePostData(args: { [key: string]: any },
+	argsValidatorMap: { [key: string]: (val: any) => boolean },
 	msg = '') {
 	for (const [argName, argValidator] of Object.entries(argsValidatorMap)) {
 		let errMsg: string;
@@ -103,6 +103,25 @@ function validatePostData(args: {[key:string]:any},
 	}
 }
 
+/**
+ * returns the path of the attachment, downloading it if it doesn't exist
+ * @param item
+ */
+async function getAttachmentPath(item): Promise<string> {
+	let filepath = item.getFilePath() as string;
+	if (!filepath || OS.File.exists(filepath)) {
+		try {
+			await Zotero.Sync.Runner.downloadFile(item);
+			filepath = item.getFilePath() as string;
+		}
+		catch (e) {
+			alert(e.message);
+			return '';
+		}
+	}
+	return filepath;
+}
+
 interface LibrariesResponse {
 	libraryID: number
 	libraryType: string
@@ -119,13 +138,13 @@ interface LibrariesResponse {
  * ]
  * ```
  */
-function getLibraries(_: object) : LibrariesResponse {
+function getLibraries(_: object): LibrariesResponse {
 	return Zotero.Libraries.getAll().map(library => ({
 		libraryID: library.libraryID,
 		libraryType: library.libraryType,
 		groupID: library.groupID,
 		groupName: library.groupName,
-	})) as  LibrariesResponse;
+	})) as LibrariesResponse;
 }
 
 interface SelectionResponse {
@@ -139,7 +158,7 @@ interface SelectionResponse {
 /**
  * Returns information on the current selection in Zotero.
  */
-function getSelection(_: object): SelectionResponse {
+async function getSelection(_: object): Promise<SelectionResponse> {
 	let selectedItems = ZoteroPane.getSelectedItems();
 	const collection = ZoteroPane.getSelectedCollection() || null;
 	const childItems = collection && selectedItems.length === 0 ? collection.getChildItems() : [];
@@ -148,13 +167,15 @@ function getSelection(_: object): SelectionResponse {
 	if (selectedItems.length) {
 		libraryID = selectedItems[0].library.libraryID;
 		groupID = selectedItems[0].library.groupID;
-		selectedItems = selectedItems.map(item => {
+		const tmp: ZoteroItem[] = [];
+		for (const item of selectedItems) {
 			const data = item.toJSON();
 			if (item.isFileAttachment()) {
-				data.filepath = item.getFilePath();
+				data.filepath = await getAttachmentPath(item);
 			}
-			return data as ZoteroItem;
-		});
+			tmp.push(data as ZoteroItem);
+		}
+		selectedItems = tmp;
 	}
 	else if (collection) {
 		libraryID = collection.library.libraryID;
@@ -170,9 +191,9 @@ function getSelection(_: object): SelectionResponse {
 }
 
 type SearchRequest = {
-	libraryID:number
+	libraryID: number
 	query: object
-	resultType:'items'|'keys'|'hits'
+	resultType: 'items' | 'keys' | 'hits'
 };
 
 type SearchResponse = ZoteroItem[] | string[] | string;
@@ -223,9 +244,9 @@ async function searchLibrary(data: SearchRequest): Promise<SearchResponse> {
 }
 
 type CreateItemRequest = {
-	libraryID:number
-	collections:string[]
-	items:object[]|string
+	libraryID: number
+	collections: string[]
+	items: object[] | string
 };
 
 /**
@@ -237,7 +258,7 @@ type CreateItemRequest = {
  * or more items in a format that can be recognized and translated by Zotero.
  * Returns the keys of the created items
  */
-async function createItems(data: CreateItemRequest):Promise<string[]> {
+async function createItems(data: CreateItemRequest): Promise<string[]> {
 	validatePostData(data, {
 		libraryID: val => typeof val == 'number' && Number.isInteger(val),
 		collections: val => val === null || Array.isArray(val),
@@ -248,7 +269,7 @@ async function createItems(data: CreateItemRequest):Promise<string[]> {
 	if (items[0] && typeof items[0] == 'object' && 'itemType' in items[0]) {
 		// items in Zotero-JSON
 		const itemIds = [];
-		for (const itemData of items as {itemType:string}[]) {
+		for (const itemData of items as { itemType: string }[]) {
 			const item = new Zotero.Item(itemData.itemType);
 			item.libraryID = libraryID;
 			for (let [key, value] of Object.entries(itemData)) {
@@ -312,9 +333,9 @@ async function createItems(data: CreateItemRequest):Promise<string[]> {
 }
 
 
-type ItemAttachmentsRequest =  {
-	libraryID:number
-	keys:string[]
+type ItemAttachmentsRequest = {
+	libraryID: number
+	keys: string[]
 };
 
 type ZoteroItemWithFilePath = ZoteroItem & {
@@ -344,11 +365,11 @@ async function getItemAttachments(data: ItemAttachmentsRequest): Promise<ItemAtt
 		if (!item) {
 			throw new Error(`No item with key ${key} exists.`);
 		}
-		attachmentsMap[key] = item.getAttachments().map(id => {
+		attachmentsMap[key] = item.getAttachments().map(async id => {
 			const attachment = Zotero.Items.get(id);
 			const result = attachment.toJSON();
 			if (attachment.isFileAttachment()) {
-				result.filepath = attachment.getFilePath();
+				result.filepath = await getAttachmentPath(item);
 			}
 			return result as string;
 		});
