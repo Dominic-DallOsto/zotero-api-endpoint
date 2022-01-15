@@ -1,6 +1,4 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import type = Mocha.utils.type;
-
 import { endpoint as addAttachmentFromFile} from './endpoints/add-attachment-from-file';
 
 declare const Zotero: any;
