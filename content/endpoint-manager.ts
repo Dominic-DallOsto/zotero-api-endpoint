@@ -1,4 +1,8 @@
 /* eslint-disable @typescript-eslint/unbound-method */
+import type = Mocha.utils.type;
+
+import { endpoint as addAttachmentFromFile} from './endpoints/add-attachment-from-file';
+
 declare const Zotero: any;
 declare const ZoteroPane: any;
 declare const OS: any;
@@ -36,6 +40,7 @@ export class EndpointManager {
 		this.addEndpoint('/zotero-api-endpoint/search-library', [HTTP_METHOD.POST], searchLibrary);
 		this.addEndpoint('/zotero-api-endpoint/create-items', [HTTP_METHOD.POST], createItems);
 		this.addEndpoint('/zotero-api-endpoint/get-item-attachments', [HTTP_METHOD.POST], getItemAttachments);
+		this.addEndpoint('/zotero-api-endpoint/add-attachment-from-file', [HTTP_METHOD.POST], addAttachmentFromFile);
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
@@ -369,6 +374,7 @@ async function getItemAttachments(data: ItemAttachmentsRequest): Promise<ItemAtt
 	}
 	return attachmentsMap;
 }
+
 
 const endpointManager = new EndpointManager();
 endpointManager.addEndpoints();
