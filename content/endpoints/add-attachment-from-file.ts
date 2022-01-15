@@ -1,10 +1,8 @@
-// unfortunately, no typings exist
+// the Zotero app, no typings are available
 declare const Zotero: any;
 
-// todo have a real type, see https://github.com/retorquere/zotero-sync/blob/main/typings/zotero.d.ts
-type ZoteroItem = {
-	[key: string]: string | object
-};
+// the Zotero data model
+import {Zotero as ZoteroItems} from '../zotero-datamodel';
 
 export interface RequestType {
 	libraryID: number
@@ -15,16 +13,15 @@ export interface RequestType {
 	collections: string[] | undefined
 }
 
-export type ResponseType = ZoteroItem;
+export type ResponseType = ZoteroItems.Item.Any;
 
 /**
  * Adds an attachment item to a parent item by its local file path.
  * Exposes Zotero.Attachments.importFromFile
  */
-export async function endpoint(data: RequestType): Promise<ZoteroItem> {
-	// todo: validation from the RequestType
+export async function endpoint(data: RequestType): Promise<ResponseType> {
 	if (data.collection) {
 		data.collections = [data.collection];
 	}
-	return await Zotero.Attachments.importFromFile(data) as ZoteroItem;
+	return await Zotero.Attachments.importFromFile(data) as ResponseType;
 }
