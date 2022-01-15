@@ -1,9 +1,12 @@
 /* eslint-disable @typescript-eslint/unbound-method */
-import { endpoint as addAttachmentFromFile} from './endpoints/add-attachment-from-file';
 
 declare const Zotero: any;
 declare const ZoteroPane: any;
-declare const OS: any;
+
+import { endpoint as addAttachmentFromFile} from './endpoints/add-attachment-from-file';
+import { endpoint as getItemAttachments } from './endpoints/get-item-attachments';
+import { endpoint as createItems} from './endpoints/create-items';
+import { getAttachmentPath } from './utils';
 
 enum HTTP_STATUS {
 	OK = 200,
@@ -39,7 +42,6 @@ export class EndpointManager {
 		this.addEndpoint('/zotero-api-endpoint/create-items', [HTTP_METHOD.POST], createItems);
 		this.addEndpoint('/zotero-api-endpoint/get-item-attachments', [HTTP_METHOD.POST], getItemAttachments);
 		this.addEndpoint('/zotero-api-endpoint/add-attachment-from-file', [HTTP_METHOD.POST], addAttachmentFromFile);
-		this.addEndpoint('/zotero-api-endpoint/get-item-attachments', [HTTP_METHOD.POST], getItemAttachments);
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
@@ -107,17 +109,7 @@ function validatePostData(args: { [key: string]: any },
 	}
 }
 
-/**
- * Returns the path of the attachment, downloading it if it doesn't exist
- */
-async function getAttachmentPath(item: any): Promise<string> {
-	let filepath = item.getFilePath() as string;
-	if (!filepath || OS.File.exists(filepath)) {
-		await Zotero.Sync.Runner.downloadFile(item);
-		filepath = item.getFilePath() as string;
-	}
-	return filepath;
-}
+
 
 interface LibrariesResponse {
 	libraryID: number
@@ -240,139 +232,6 @@ async function searchLibrary(data: SearchRequest): Promise<SearchResponse> {
 	return items as SearchResponse;
 }
 
-type CreateItemRequest = {
-	libraryID: number
-	collections: string[]
-	items: object[] | string
-};
-
-/**
- * Create or more items in the given library which can later be linked.
- * Expects JSON POST data containing an object with the following properties:
- * `libraryID`: the integer id of the library; `collections`: null if no collection,
- * or an array of collection keys which will be added to each newly created
- * entry; `items`: Either an array of zotero json item data or a string containing one
- * or more items in a format that can be recognized and translated by Zotero.
- * Returns the keys of the created items
- */
-async function createItems(data: CreateItemRequest): Promise<string[]> {
-	validatePostData(data, {
-		libraryID: val => typeof val == 'number' && Number.isInteger(val),
-		collections: val => val === null || Array.isArray(val),
-		items: val => val && typeof val == 'string' || Array.isArray(val) && val.length > 0,
-	}, 'libraryID: int, collections: array|null, items: object[]|string');
-	const {libraryID, collections, items} = data;
-	let zoteroItems: ZoteroItem[];
-	if (items[0] && typeof items[0] == 'object' && 'itemType' in items[0]) {
-		// items in Zotero-JSON
-		const itemIds = [];
-		for (const itemData of items as { itemType: string }[]) {
-			const item = new Zotero.Item(itemData.itemType);
-			item.libraryID = libraryID;
-			for (let [key, value] of Object.entries(itemData)) {
-				switch (key) {
-					case 'itemType':
-					case 'key':
-					case 'version':
-						// ignore
-						break;
-					case 'creators':
-						item.setCreators(value);
-						break;
-					case 'tags':
-						item.setTags(value);
-						break;
-					case 'collections':
-						if (collections) {
-							// if collection id is given, add to existing ones
-							// fix: is this a string or an array of strings?
-							value = value.concat(collections[0]);
-						}
-						item.setCollections(value);
-						break;
-					case 'relations':
-						item.setRelations(value);
-						break;
-					default:
-						item.setField(key, value);
-				}
-			}
-			const itemID = await item.saveTx();
-			itemIds.push(itemID);
-		}
-		zoteroItems = await Zotero.Items.getAsync(itemIds);
-	}
-	else if (typeof items == 'string') {
-		// Import items via translators
-		// adapted from https://github.com/zotero/zotero/blob/master/chrome/content/zotero/xpcom/connector/server_connector.js#L1416
-		await Zotero.Schema.schemaUpdatePromise;
-		const translate = new Zotero.Translate.Import();
-		translate.setString(items);
-		const translators = await translate.getTranslators();
-		if (!translators || !translators.length) {
-			throw new Error('No translator could be found for input data.');
-		}
-		translate.setTranslator(translators[0]);
-		zoteroItems = await translate.translate({
-			libraryID,
-			collections,
-			forceTagType: 1,
-			// Import translation skips selection by default, so force it to occur
-			saveOptions: {
-				skipSelect: false,
-			},
-		});
-	}
-	else {
-		throw new Error('Invalid items data');
-	}
-	return zoteroItems.map(item => item.key as string);
-}
-
-
-type ItemAttachmentsRequest = {
-	libraryID: number
-	keys: string[]
-};
-
-type ZoteroItemWithFilePath = ZoteroItem & {
-	filepath?: string
-};
-
-type ItemAttachmentsResponse = {
-	[key: string]: ZoteroItemWithFilePath
-};
-
-/**
- * Return the item data of the attachments of items identified by their key, with the
- * absolute path to the stored attachment files added, so that citation-mining software can extract
- * reference data from them.
- * Expects POST data containing an object with properties `libraryID` and `keys`. Returns  a map of
- * keys and attachment item data.
- */
-async function getItemAttachments(data: ItemAttachmentsRequest): Promise<ItemAttachmentsResponse> {
-	validatePostData(data, {
-		libraryID: val => typeof val == 'number' && Number.isInteger(val),
-		keys: val => Array.isArray(val) && val.length > 0,
-	}, 'libraryID: int, keys: string[]');
-	const {libraryID, keys} = data;
-	const attachmentsMap: ItemAttachmentsResponse = {};
-	for (const key of keys) {
-		const item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
-		if (!item) {
-			throw new Error(`No item with key ${key} exists.`);
-		}
-		attachmentsMap[key] = item.getAttachments().map(async id => {
-			const attachment = Zotero.Items.get(id);
-			const result = attachment.toJSON();
-			if (attachment.isFileAttachment()) {
-				result.filepath = await getAttachmentPath(item);
-			}
-			return result as string;
-		});
-	}
-	return attachmentsMap;
-}
 
 
 const endpointManager = new EndpointManager();

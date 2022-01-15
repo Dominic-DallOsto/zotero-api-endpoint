@@ -2,22 +2,26 @@
 declare const Zotero: any;
 
 // the Zotero data model
-import {Zotero as ZoteroItems} from '../zotero-datamodel';
+import {Zotero as ZoteroModel} from '../zotero-datamodel';
 
 export interface RequestType {
 	libraryID: number
-	filepath: string
+	file: string
 	fileBaseName: string
-	parentItemID: number
+	parentItemID: number|string
 	collection: string|null
-	collections: string[] | undefined
+	collections?: string[]
+	title?: string
+	contentType?: string
+	charset?: string
+	saveOptions?: object
 }
 
-export type ResponseType = ZoteroItems.Item.Any;
+export type ResponseType = ZoteroModel.Item.Any;
 
 /**
  * Adds an attachment item to a parent item by its local file path.
- * Exposes Zotero.Attachments.importFromFile
+ * Exposes Zotero.Attachments.importFromFile()
  */
 export async function endpoint(data: RequestType): Promise<ResponseType> {
 	if (data.collection) {
