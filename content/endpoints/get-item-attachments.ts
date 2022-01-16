@@ -3,8 +3,10 @@ declare const Zotero: any;
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
 import { getAttachmentPath } from '../utils';
 
+type integer = number;
+
 export interface RequestType {
-	libraryID: number
+	libraryID: integer
 	keys: string[]
 }
 

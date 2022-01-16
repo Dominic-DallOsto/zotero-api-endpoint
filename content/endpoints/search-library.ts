@@ -4,9 +4,10 @@ import {validatePostData} from '../utils';
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
 
 type ZoteroItem = ZoteroModel.Item.Any;
+type integer = number;
 
 interface RequestType {
-	libraryID: number
+	libraryID: integer
 	query: object
 	resultType: 'items' | 'keys' | 'hits'
 }

@@ -1,0 +1,41 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "NamedParameters<typeof endpoint>": {
+      "additionalProperties": false,
+      "properties": {
+        "_": {
+          "type": "object"
+        }
+      },
+      "required": [
+        "_"
+      ],
+      "type": "object"
+    },
+    "ResponseType": {
+      "additionalProperties": false,
+      "properties": {
+        "groupID": {
+          "type": "number"
+        },
+        "groupName": {
+          "type": "string"
+        },
+        "libraryID": {
+          "type": "number"
+        },
+        "libraryType": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "libraryID",
+        "libraryType",
+        "groupID",
+        "groupName"
+      ],
+      "type": "object"
+    }
+  }
+}
