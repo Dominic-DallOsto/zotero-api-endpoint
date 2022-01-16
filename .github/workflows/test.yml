@@ -1,0 +1,65 @@
+name: test
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build, Upload, Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      # - name: Start test server
+      #   run: docker-compose up -d main-server
+
+      # - uses: isbang/compose-action@v1.0.0
+      #   with:
+      #     compose-file: './docker/docker-compose.yml'
+
+      # - name: Run functional test
+      #   run: newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
+      
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+          #cache: npm
+
+      - name: Install Zotero
+        run: wget https://downloads.sourceforge.net/project/zotero-deb/install.sh -qO- | sh && sudo apt update && sudo apt install -y zotero
+
+      - name: Setup Zotero profile
+        run: |
+          cp -r test/.zotero .zotero
+          echo $(readlink -f .)/build >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com
+          echo extension at: $(readlink -f .)/build
+      
+      - name: Cache Node modules
+        id: node-cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+        
+      - name: Install Node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+
+      - name: Install Newman
+        run: npm -g install newman
+        
+      - name: Build Plugin
+        run: npm run build
+
+      - name: Start Zotero and Run Tests
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: |
+            zotero -jsconsole -purgecaches -ZoteroDebugText > /home/runner/.ZOTLOG.log 2>&1 &
+            sleep 10s
+            newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: debug log
+          path: ~/.ZOTLOG.log
