@@ -60,5 +60,5 @@ jobs:
       
       - name: Start Zotero and Run Tests
         run: |
-            xvfb-run zotero &
-            sleep 5s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
+            xvfb-run zotero -ZoteroDebugText -purgecaches &
+            sleep 10s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
