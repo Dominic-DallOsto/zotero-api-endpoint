@@ -29,7 +29,10 @@ jobs:
         run: wget https://downloads.sourceforge.net/project/zotero-deb/install.sh -qO- | sh && sudo apt update && sudo apt install -y zotero
 
       - name: Setup Zotero profile
-        run: cp -r test/.zotero .zotero && echo $(readlink -f .)/build >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com
+        run: |
+          cp -r test/.zotero .zotero
+          echo $(readlink -f .)/build >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com
+          echo extension at: $(readlink -f .)/build
       
       # On GitHub
       - name: Install xvfb
@@ -56,9 +59,9 @@ jobs:
         run: npm -g install newman
         
       - name: Build Plugin
-        run: npm run build
-      
+        run: npm run build && ls $(readlink -f .)/build
+
       - name: Start Zotero and Run Tests
         run: |
-            xvfb-run zotero -ZoteroDebugText -purgecaches &
+            xvfb-run zotero &
             sleep 10s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
