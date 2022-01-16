@@ -34,16 +34,6 @@ jobs:
           echo $(readlink -f .)/build >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com
           echo extension at: $(readlink -f .)/build
       
-      # On GitHub
-      - name: Install xvfb
-        if: env.ACT != 'true'
-        run: sudo apt update && sudo apt install -y xvfb
-      
-      # Local via act
-      - name: Install packages for act
-        if: env.ACT == 'true'
-        run: apt update && apt install -y zstd xvfb dbus-x11 libgtk-3-0 libx11-xcb1 libdbus-glib-1-2 libxt6
-      
       - name: Cache Node modules
         id: node-cache
         uses: actions/cache@v2
@@ -59,9 +49,17 @@ jobs:
         run: npm -g install newman
         
       - name: Build Plugin
-        run: npm run build && ls $(readlink -f .)/build
+        run: npm run build
 
       - name: Start Zotero and Run Tests
-        run: |
-            xvfb-run zotero &
-            sleep 10s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
+        uses: GabrielBB/xvfb-action@v1
+        with:
+          run: |
+            zotero -jsconsole -purgecaches -ZoteroDebugText > /home/runner/.ZOTLOG.log 2>&1 &
+            sleep 10s
+            newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: debug log
+          path: ~/.ZOTLOG.log
