@@ -4,14 +4,17 @@ import {Zotero as ZoteroModel} from '../zotero-datamodel';
 import {getAttachmentPath} from '../utils';
 
 type ZoteroItem = ZoteroModel.Item.Any;
+type integer = number;
 
 export interface ResponseType {
-	libraryID: number
-	groupID: number
+	libraryID: integer
+	groupID: integer
 	selectedItems: ZoteroItem[]
 	collection: string
 	childItems: ZoteroItem[]
 }
+
+export type RequestType = null;
 
 /**
  * Returns information on the current selection in Zotero.

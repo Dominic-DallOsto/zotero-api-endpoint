@@ -1,0 +1,40 @@
+{
+  "$ref": "#/definitions/NamedParameters%3Ctypeof%20endpoint%3E",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "NamedParameters<typeof endpoint>": {
+      "additionalProperties": false,
+      "properties": {
+        "data": {
+          "additionalProperties": false,
+          "properties": {
+            "libraryID": {
+              "type": "number"
+            },
+            "query": {
+              "type": "object"
+            },
+            "resultType": {
+              "enum": [
+                "items",
+                "keys",
+                "hits"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "libraryID",
+            "query",
+            "resultType"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "type": "object"
+    }
+  }
+}

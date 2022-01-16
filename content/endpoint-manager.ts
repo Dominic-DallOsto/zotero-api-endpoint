@@ -2,12 +2,14 @@
 
 declare const Zotero: any;
 
-import { endpoint as addAttachmentFromFile} from './endpoints/add-attachment-from-file';
-import { endpoint as getItemAttachments } from './endpoints/get-item-attachments';
-import { endpoint as createItems} from './endpoints/create-items';
-import { endpoint as getLibraries } from './endpoints/get-libraries';
-import { endpoint as getSelection } from './endpoints/get-selection';
-import { endpoint as searchLibrary } from './endpoints/search-library';
+import Ajv from '../lib/ajv2020.bundle.js';
+
+import * as addAttachmentFromFile from './endpoints/add-attachment-from-file';
+import * as getItemAttachments from './endpoints/get-item-attachments';
+import * as createItems from './endpoints/create-items';
+import * as getLibraries from './endpoints/get-libraries';
+import * as getSelection from './endpoints/get-selection';
+import * as searchLibrary from './endpoints/search-library';
 
 enum HTTP_STATUS {
 	OK = 200,
@@ -29,6 +31,17 @@ enum MIME_TYPE {
 
 type ResponseCallback = (status: HTTP_STATUS, type: MIME_TYPE, message: string) => void;
 
+type EndpointFunction = (data) => Promise<any> | any;
+
+interface Endpoint {
+	endpoint: EndpointFunction
+}
+
+interface ErrorResponse {
+	error: string
+	diagnostics?: any
+}
+
 export class EndpointManager {
 	private endpoints = [];
 
@@ -41,23 +54,34 @@ export class EndpointManager {
 		this.addEndpoint('/zotero-api-endpoint/add-attachment-from-file', [HTTP_METHOD.POST], addAttachmentFromFile);
 	}
 
-	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[],
-		endpointFunction: (data) => Promise<any> | any) {
+	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[], endpoint: Endpoint) {
 		this.endpoints.push(endpointName);
 
 		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-		Zotero.Server.Endpoints[endpointName] = function() {
+		Zotero.Server.Endpoints[endpointName] = function () {
 			return {
 				supportedMethods,
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
-					try {
-						const result = await endpointFunction(data);
-						sendResponseCallback(HTTP_STATUS.OK, MIME_TYPE.JSON, JSON.stringify(result));
+					const ajv = new Ajv() // options can be passed, e.g. {allErrors: true}
+					const endpointBaseName = endpointName.split("/").pop();
+					const schemaFile = `chrome://zotero-api-endpoint/content/schema/${endpointBaseName}.json`;
+					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile));
+					const validate = ajv.compile(schema);
+					if (!validate(data)) {
+						const result: ErrorResponse = {
+							error: "Request data validation failed",
+							diagnostics: validate.errors
+						}
+						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
 					}
-					catch (e) {
-						// could return more error info with a debug switch
-						const result = {
-							error: e.message,
+					try {
+						const endpointFunction: EndpointFunction = endpoint.endpoint;
+						const result = await endpointFunction(data);
+						// todo: response validation
+						sendResponseCallback(HTTP_STATUS.OK, MIME_TYPE.JSON, JSON.stringify(result));
+					} catch (e) {
+						const result: ErrorResponse = {
+							error: e.message
 						};
 						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
 					}

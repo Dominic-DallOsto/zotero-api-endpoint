@@ -1,11 +1,11 @@
-// the Zotero app, no typings are available
 declare const Zotero: any;
 
-// the Zotero data model
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
 
+type integer = number;
+
 export interface RequestType {
-	libraryID: number
+	libraryID: integer
 	file: string
 	fileBaseName: string
 	parentItemID: number|string
