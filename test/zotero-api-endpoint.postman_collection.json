@@ -1,0 +1,573 @@
+{
+	"info": {
+		"_postman_id": "6663e8ec-d019-4e30-9ea0-82d20b5d245f",
+		"name": "zotero-api-endpoint",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Interactive tests with zotero.org group",
+			"item": [
+				{
+					"name": "Nonexistent endpoint",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Body matches string\", function () {",
+									"    pm.expect(pm.response.text()).to.include(\"No endpoint found\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:23119/does-not-exist",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"does-not-exist"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/get-libraries",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var schema = {",
+									"  \"type\": \"array\",",
+									"  \"items\": {",
+									"    \"type\": \"object\",",
+									"    \"required\": [],",
+									"    \"properties\": {",
+									"      \"libraryID\": {",
+									"        \"type\": \"number\"",
+									"      },",
+									"      \"libraryType\": {",
+									"        \"type\": \"string\"",
+									"      }",
+									"    }",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"for (let lib of jsonData) {",
+									"    if (lib.libraryID === 1){",
+									"        pm.globals.set(\"libraryID\", lib.libraryID);",
+									"    }",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/get-libraries",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"get-libraries"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/create-items",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var schema = {",
+									"  \"type\": \"array\",",
+									"  \"items\": {",
+									"    \"type\": \"string\"",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"console.log(pm.response);",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.globals.set(\"itemID\", jsonData[0]);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"collections\": null,\n\t\"items\": [  {\n        \"key\": \"TPURWBEY\",\n        \"version\": 31060,\n        \"itemType\": \"book\",\n        \"url\": \"https://www.rechtssoziologie.info/literatur/michael-wrase-christian-boulanger-hg.-die-politik-des-verfassungsrechts\",\n        \"rights\": \"All rights reserved\",\n        \"series\": \"Recht und Gesellschaft\",\n        \"edition\": \"1. Aufl\",\n        \"place\": \"Baden-Baden\",\n        \"publisher\": \"Nomos-Verl\",\n        \"ISBN\": \"978-3-8487-0495-8\",\n        \"date\": \"2013\",\n        \"extra\": \"OCLC: 862984249\",\n        \"seriesNumber\": \"6\",\n        \"libraryCatalog\": \"Gemeinsamer Bibliotheksverbund ISBN\",\n        \"language\": \"ger eng\",\n        \"title\": \"Die Politik des Verfassungsrechts: interdisziplinäre und vergleichende Perspektiven auf die Rolle und Funktion von Verfassungsgerichten\",\n        \"shortTitle\": \"Die Politik des Verfassungsrechts\",\n        \"numPages\": \"345\",\n        \"creators\": [\n            {\n                \"firstName\": \"Michael\",\n                \"lastName\": \"Wrase\",\n                \"creatorType\": \"editor\"\n            },\n            {\n                \"firstName\": \"Christian\",\n                \"lastName\": \"Boulanger\",\n                \"creatorType\": \"editor\"\n            }\n        ],\n        \"tags\": [\n            {\n                \"tag\": \"Deutschland\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Kongress\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Österreich\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Schweiz\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Ungarn\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Verfassungsgerichtsbarkeit\",\n                \"type\": 1\n            }\n        ],\n        \"collections\": [],\n        \"relations\": {\n            \"owl:sameAs\": [\n                \"http://zotero.org/groups/1137215/items/XGCH7BC7\",\n                \"http://zotero.org/groups/2612021/items/VULKIGYV\",\n                \"http://zotero.org/groups/495788/items/YILIEJZR\"\n            ],\n            \"dc:relation\": [\n                \"http://zotero.org/users/39226/items/UZLXMA3B\"\n            ]\n        },\n        \"dateAdded\": \"2017-05-04T09:32:20Z\",\n        \"dateModified\": \"2019-01-21T13:48:54Z\"\n    }]\n}"
+						},
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/create-items",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"create-items"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/get-selection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var schema = {",
+									"  \"type\": \"object\",",
+									"  \"required\": [],",
+									"  \"properties\": {",
+									"    \"libraryID\": {",
+									"      \"type\": \"number\"",
+									"    },",
+									"    \"groupID\": {",
+									"      \"type\": [\"number\",\"null\"]",
+									"    },",
+									"    \"selectedItems\": {",
+									"      \"type\": \"array\"",
+									"    },",
+									"    \"collection\": {",
+									"      \"type\": [\"object\",\"null\"]",
+									"    },",
+									"    \"childItems\": {",
+									"      \"type\": \"array\",",
+									"      \"items\": {",
+									"        \"type\": \"object\"",
+									"      }",
+									"    }",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});",
+									"var jsonData = pm.response.json();",
+									"pm.globals.set(\"selection\", jsonData);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/get-selection",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"get-selection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/search-library",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var schema = {",
+									"  \"type\": \"array\",",
+									"  \"items\": {",
+									"    \"type\": \"object\",",
+									"    \"required\": [],",
+									"    \"properties\": {",
+									"      \"key\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"version\": {",
+									"        \"type\": \"number\"",
+									"      },",
+									"      \"itemType\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"url\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"volume\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"issue\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"publicationTitle\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"ISSN\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"date\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"DOI\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"accessDate\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"libraryCatalog\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"title\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"shortTitle\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"creators\": {",
+									"        \"type\": \"array\",",
+									"        \"items\": {",
+									"          \"type\": \"object\",",
+									"          \"required\": [],",
+									"          \"properties\": {",
+									"            \"firstName\": {",
+									"              \"type\": \"string\"",
+									"            },",
+									"            \"lastName\": {",
+									"              \"type\": \"string\"",
+									"            },",
+									"            \"creatorType\": {",
+									"              \"type\": \"string\"",
+									"            }",
+									"          }",
+									"        }",
+									"      },",
+									"      \"tags\": {",
+									"        \"type\": \"array\",",
+									"        \"items\": {",
+									"          \"type\": [\"string\",\"object\"]",
+									"        }",
+									"      },",
+									"      \"collections\": {",
+									"        \"type\": \"array\",",
+									"        \"items\": {",
+									"          \"type\": \"string\"",
+									"        }",
+									"      },",
+									"      \"relations\": {",
+									"        \"type\": \"object\",",
+									"        \"required\": [],",
+									"        \"properties\": {",
+									"          \"dc:replaces\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": {",
+									"              \"type\": \"string\"",
+									"            }",
+									"          }",
+									"        }",
+									"      },",
+									"      \"dateAdded\": {",
+									"        \"type\": \"string\"",
+									"      },",
+									"      \"dateModified\": {",
+									"        \"type\": \"string\"",
+									"      }",
+									"    }",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});",
+									"",
+									"",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"query\": {\n\t\t\"creator\": [\"contains\", \"boulanger\"]\n\t},\n\t\"resultType\": \"items\"\n}"
+						},
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/search-library",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"search-library"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/get-item-attachments",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var schema = {",
+									"  \"type\": \"object\",",
+									"  \"required\": [],",
+									"  \"patternProperties\": {",
+									"    \"^[A-Z0-9]+$\": {",
+									"      \"type\": \"array\",",
+									"      \"items\": {",
+									"        \"type\": \"object\",",
+									"        \"required\": [],",
+									"        \"properties\": {",
+									"          \"key\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"version\": {",
+									"            \"type\": \"number\"",
+									"          },",
+									"          \"itemType\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"title\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"parentItem\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"linkMode\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"contentType\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"charset\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"filename\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"tags\": {",
+									"            \"type\": \"array\",",
+									"            \"items\": {",
+									"              \"type\": \"string\"",
+									"            }",
+									"          },",
+									"          \"relations\": {",
+									"            \"type\": \"object\",",
+									"            \"required\": [],",
+									"            \"properties\": {}",
+									"          },",
+									"          \"dateAdded\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"dateModified\": {",
+									"            \"type\": \"string\"",
+									"          },",
+									"          \"filepath\": {",
+									"            \"type\": \"string\"",
+									"          }",
+									"        }",
+									"      }",
+									"    }",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"keys\": [\"{{itemID}}\"]\n}"
+						},
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/get-item-attachments",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"get-item-attachments"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"var schema = {",
+									"  \"type\": \"object\",",
+									"  \"required\": [],",
+									"  \"properties\": {",
+									"    \"key\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"version\": {",
+									"      \"type\": \"number\"",
+									"    },",
+									"    \"itemType\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"title\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"parentItem\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"linkMode\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"contentType\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"charset\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"filename\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"tags\": {",
+									"      \"type\": \"array\",",
+									"      \"items\": {",
+									"        \"type\": \"string\"",
+									"      }",
+									"    },",
+									"    \"relations\": {",
+									"      \"type\": \"object\",",
+									"      \"required\": [],",
+									"      \"properties\": {}",
+									"    },",
+									"    \"dateAdded\": {",
+									"      \"type\": \"string\"",
+									"    },",
+									"    \"dateModified\": {",
+									"      \"type\": \"string\"",
+									"    }",
+									"  }",
+									"};",
+									"// https://easy-json-schema.github.io/",
+									"pm.test('Schema is valid', function () {",
+									"    pm.response.to.have.jsonSchema(schema);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"let selection = pm.globals.get(\"selection\");",
+									"pm.variables.set(\"libraryID\", selection.libraryID)",
+									"pm.variables.set(\"parentItemKey\", selection.selectedItems[0].key);"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"/home/zotero/test/blank.txt\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemKey\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
+						},
+						"url": {
+							"raw": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
+							"host": [
+								"localhost"
+							],
+							"port": "23119",
+							"path": [
+								"zotero-api-endpoint",
+								"add-attachment-from-file"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

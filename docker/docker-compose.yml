@@ -1,0 +1,10 @@
+version: '3'
+services:
+  zotero-plugin-test:
+    build: ./
+    container_name: zotero-plugin-test
+    image: zotero-plugin-test
+    ports:
+      - 23119:23119
+    volumes:
+      - ../build/:~/build
