@@ -34,4 +34,4 @@ jobs:
 
       # For some reason these tests only work if the container is in interactive mode and not detached...
       - name: run tests
-        run: echo 'bash -c "echo $(readlink -f build) >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com && xvfb-run zotero & sleep 5s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json"' | docker run -i --rm -v $(readlink -f build):/home/zotero/build -v $(readlink -f test):/home/zotero/test --name zotero zotero
+        run: echo 'bash -c "echo $(readlink -f build) >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com && xvfb-run zotero & sleep 5s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json --verbose"' | docker run -i --rm -v $(readlink -f build):/home/zotero/build -v $(readlink -f test):/home/zotero/test --name zotero zotero

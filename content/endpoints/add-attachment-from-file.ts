@@ -9,6 +9,7 @@ export interface RequestType {
 	file: string
 	fileBaseName: string
 	parentItemID: number|string
+	parentItemKey: string
 	collection: string|null
 	collections?: string[]
 	title?: string
@@ -26,6 +27,9 @@ export type ResponseType = ZoteroModel.Item.Any;
 export async function endpoint(data: RequestType): Promise<ResponseType> {
 	if (data.collection) {
 		data.collections = [data.collection];
+	}
+	if (!data.parentItemID && data.parentItemKey){
+		data.parentItemID = Zotero.Items.getIDFromLibraryAndKey(data.libraryID, data.parentItemKey);
 	}
 	return await Zotero.Attachments.importFromFile(data) as ResponseType;
 }

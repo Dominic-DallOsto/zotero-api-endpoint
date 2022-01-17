@@ -551,7 +551,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"test/blank.pdf\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemID\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
+							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"/home/zotero/test/blank.txt\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemKey\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
