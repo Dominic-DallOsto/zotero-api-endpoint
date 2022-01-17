@@ -1,0 +1,38 @@
+name: test
+
+on:
+  push:
+    branches:
+      - 'master'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Cache Node modules
+        id: node-cache
+        uses: actions/cache@v2
+        with:
+          path: node_modules
+          key: node-modules-${{ hashFiles('package-lock.json') }}
+        
+      - name: Install Node modules
+        if: steps.node-cache.outputs.cache-hit != 'true'
+        run: npm install
+        
+      - name: Build plugin
+        run: npm run build
+
+      - name: Build
+        run: docker build -t zotero docker/
+
+      - name: run tests
+        run: echo 'bash -c "echo $(readlink -f build) >> .zotero/zotero/abcdefgh.test/extensions/api-endpoint@hotmail.com && xvfb-run zotero & sleep 5s && newman run test/zotero-api-endpoint.postman_collection.json -g test/workspace.postman_globals.json"' | docker run -i --rm -v $(readlink -f build):/home/zotero/build -v $(readlink -f test):/home/zotero/test --name zotero zotero
