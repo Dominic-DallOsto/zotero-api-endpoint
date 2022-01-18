@@ -6,13 +6,13 @@ import {Zotero as ZoteroModel} from '../zotero-datamodel';
 type ZoteroItem = ZoteroModel.Item.Any;
 type integer = number;
 
-interface RequestType {
+export interface RequestType {
 	libraryID: integer
 	query: object
 	resultType: 'items' | 'keys' | 'hits'
 }
 
-type ResponseType = ZoteroItem[] | string[] | string;
+export type ResponseType = ZoteroItem[] | string[] | string;
 
 /**
  * Searches a given library with a set of given conditions (see

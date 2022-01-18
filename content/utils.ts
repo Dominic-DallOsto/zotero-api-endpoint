@@ -4,11 +4,11 @@ declare const OS: any;
 /**
  * Returns the path of the attachment, downloading it if it doesn't exist
  */
-export async function getAttachmentPath(item: any): Promise<string> {
-	let filepath = item.getFilePath() as string;
+export async function getAttachmentPath(item: {getFilePath: () => string}): Promise<string> {
+	let filepath = item.getFilePath() ;
 	if (!filepath || OS.File.exists(filepath)) {
 		await Zotero.Sync.Runner.downloadFile(item);
-		filepath = item.getFilePath() as string;
+		filepath = item.getFilePath() ;
 	}
 	return filepath;
 }
@@ -23,7 +23,7 @@ export async function getAttachmentPath(item: any): Promise<string> {
  */
 export function validatePostData(args: { [key: string]: any },
 	argsValidatorMap: { [key: string]: (val: any) => boolean },
-	msg = '') {
+	msg = '') : void {
 	for (const [argName, argValidator] of Object.entries(argsValidatorMap)) {
 		let errMsg: string;
 		if (args[argName] === undefined) {
