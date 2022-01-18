@@ -13,6 +13,9 @@
       ],
       "type": "object"
     },
+    "RequestType": {
+      "type": "null"
+    },
     "ResponseType": {
       "additionalProperties": false,
       "properties": {

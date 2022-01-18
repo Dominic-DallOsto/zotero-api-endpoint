@@ -58,20 +58,22 @@ export class EndpointManager {
 		this.endpoints.push(endpointName);
 
 		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-		Zotero.Server.Endpoints[endpointName] = function () {
+		Zotero.Server.Endpoints[endpointName] = function() {
 			return {
 				supportedMethods,
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
-					const ajv = new Ajv() // options can be passed, e.g. {allErrors: true}
-					const endpointBaseName = endpointName.split("/").pop();
+					const endpointBaseName = endpointName.split('/').pop();
 					const schemaFile = `chrome://zotero-api-endpoint/content/schema/${endpointBaseName}.json`;
-					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile));
-					const validate = ajv.compile(schema);
-					if (!validate(data)) {
+					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile) as string) as object;
+					const ref = '#/definitions/RequestType';
+					const options = {strict: false, validateSchema: false};
+					const ajv = new Ajv(options);
+					ajv.compile(schema);
+					if (!ajv.validate(ref, data)) {
 						const result: ErrorResponse = {
-							error: "Request data validation failed",
-							diagnostics: validate.errors
-						}
+							error: 'Request data validation failed',
+							diagnostics: ajv.errorsText(),
+						};
 						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
 					}
 					try {
@@ -79,9 +81,10 @@ export class EndpointManager {
 						const result = await endpointFunction(data);
 						// todo: response validation
 						sendResponseCallback(HTTP_STATUS.OK, MIME_TYPE.JSON, JSON.stringify(result));
-					} catch (e) {
+					}
+					catch (e) {
 						const result: ErrorResponse = {
-							error: e.message
+							error: e.message,
 						};
 						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
 					}

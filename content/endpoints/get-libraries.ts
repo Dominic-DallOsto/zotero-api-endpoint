@@ -1,4 +1,5 @@
 declare const Zotero: any;
+
 type integer = number;
 
 export interface ResponseType {
