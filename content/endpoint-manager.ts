@@ -63,7 +63,7 @@ export class EndpointManager {
 				supportedMethods,
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
 					const endpointBaseName = endpointName.split('/').pop();
-					const schemaFile = `chrome://zotero-api-endpoint/content/schema/${endpointBaseName}.json`;
+					const schemaFile = `resource://zotero-api-endpoint/schema/${endpointBaseName}.json`;
 					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile) as string) as object;
 					const ref = '#/definitions/RequestType';
 					const options = {strict: false, validateSchema: false};
