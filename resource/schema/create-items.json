@@ -17,10 +17,17 @@
       "additionalProperties": false,
       "properties": {
         "collections": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
+          "anyOf": [
+            {
+              "type": "null"
+            },
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          ]
         },
         "items": {
           "anyOf": [
