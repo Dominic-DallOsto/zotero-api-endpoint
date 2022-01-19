@@ -5,7 +5,7 @@ type integer = number;
 
 export interface RequestType {
 	libraryID: integer
-	collections: string[]
+	collections: null|string[]
 	items: object[] | string
 }
 

@@ -32,7 +32,7 @@ export async function endpoint(_: object): Promise<ResponseType> {
 		for (const item of selectedItems) {
 			const data = item.toJSON();
 			if (item.isFileAttachment()) {
-				data.filepath = await getAttachmentPath(item);
+				data.filepath = await getAttachmentPath(item as {getFilePath: () => string});
 			}
 			tmp.push(data as ZoteroItem);
 		}

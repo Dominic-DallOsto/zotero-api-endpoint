@@ -35,7 +35,7 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 			const attachment = Zotero.Items.get(id);
 			const result = attachment.toJSON();
 			if (attachment.isFileAttachment()) {
-				result.filepath = await getAttachmentPath(item);
+				result.filepath = await getAttachmentPath(item as {getFilePath: () => string});
 			}
 			return result as string;
 		});
