@@ -14,60 +14,106 @@
       "type": "object"
     },
     "RequestType": {
-      "additionalProperties": false,
-      "properties": {
-        "charset": {
-          "type": "string"
-        },
-        "collection": {
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "collections": {
-          "items": {
-            "type": "string"
-          },
-          "type": "array"
-        },
-        "contentType": {
-          "type": "string"
-        },
-        "file": {
-          "type": "string"
-        },
-        "fileBaseName": {
-          "type": "string"
-        },
-        "libraryID": {
-          "type": "number"
-        },
-        "parentItemID": {
-          "anyOf": [
-            {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "charset": {
+              "type": "string"
+            },
+            "collection": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "collections": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "contentType": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "fileBaseName": {
+              "type": "string"
+            },
+            "libraryID": {
               "type": "number"
             },
-            {
+            "parentItemID": {
+              "type": "number"
+            },
+            "saveOptions": {
+              "type": "object"
+            },
+            "title": {
               "type": "string"
             }
-          ]
-        },
-        "saveOptions": {
+          },
+          "required": [
+            "collection",
+            "file",
+            "fileBaseName",
+            "libraryID",
+            "parentItemID"
+          ],
           "type": "object"
         },
-        "title": {
-          "type": "string"
+        {
+          "additionalProperties": false,
+          "properties": {
+            "charset": {
+              "type": "string"
+            },
+            "collection": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "collections": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "contentType": {
+              "type": "string"
+            },
+            "file": {
+              "type": "string"
+            },
+            "fileBaseName": {
+              "type": "string"
+            },
+            "libraryID": {
+              "type": "number"
+            },
+            "parentItemKey": {
+              "type": "string"
+            },
+            "saveOptions": {
+              "type": "object"
+            },
+            "title": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "collection",
+            "file",
+            "fileBaseName",
+            "libraryID",
+            "parentItemKey"
+          ],
+          "type": "object"
         }
-      },
-      "required": [
-        "libraryID",
-        "file",
-        "fileBaseName",
-        "parentItemID",
-        "collection"
-      ],
-      "type": "object"
+      ]
     },
     "ResponseType": {
       "$ref": "#/definitions/Zotero.Item.Any"
