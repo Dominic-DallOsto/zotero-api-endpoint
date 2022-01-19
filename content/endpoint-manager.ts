@@ -2,7 +2,7 @@
 
 declare const Zotero: any;
 
-import Ajv from '../lib/ajv2020.bundle.js';
+import Ajv from 'ajv';
 
 import * as addAttachmentFromFile from './endpoints/add-attachment-from-file';
 import * as getItemAttachments from './endpoints/get-item-attachments';
