@@ -1,10 +1,11 @@
 declare const Zotero: any;
 
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
+type integer = number;
 
 export interface RequestType {
-	libraryID: number
-	collections: string[]
+	libraryID: integer
+	collections: null|string[]
 	items: object[] | string
 }
 

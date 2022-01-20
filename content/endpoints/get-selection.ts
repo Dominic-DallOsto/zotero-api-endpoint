@@ -4,14 +4,17 @@ import {Zotero as ZoteroModel} from '../zotero-datamodel';
 import {getAttachmentPath} from '../utils';
 
 type ZoteroItem = ZoteroModel.Item.Any;
+type integer = number;
 
 export interface ResponseType {
-	libraryID: number
-	groupID: number
+	libraryID: integer
+	groupID: integer
 	selectedItems: ZoteroItem[]
 	collection: string
 	childItems: ZoteroItem[]
 }
+
+export type RequestType = null;
 
 /**
  * Returns information on the current selection in Zotero.
@@ -29,7 +32,7 @@ export async function endpoint(_: object): Promise<ResponseType> {
 		for (const item of selectedItems) {
 			const data = item.toJSON();
 			if (item.isFileAttachment()) {
-				data.filepath = await getAttachmentPath(item);
+				data.filepath = await getAttachmentPath(item as {getFilePath: () => string});
 			}
 			tmp.push(data as ZoteroItem);
 		}

@@ -1,11 +1,15 @@
 declare const Zotero: any;
 
+type integer = number;
+
 export interface ResponseType {
-	libraryID: number
+	libraryID: integer
 	libraryType: string
-	groupID: number
+	groupID: integer
 	groupName: string
 }
+
+export type RequestType = null;
 
 /**
  * Returns an array with data on the accessible libraries, e.g.

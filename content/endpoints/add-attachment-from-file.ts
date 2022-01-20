@@ -1,15 +1,13 @@
-// the Zotero app, no typings are available
 declare const Zotero: any;
 
-// the Zotero data model
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
 
-export interface RequestType {
-	libraryID: number
+type integer = number;
+
+interface BaseRequestType {
+	libraryID: integer
 	file: string
 	fileBaseName: string
-	parentItemID: number|string
-	parentItemKey: string
 	collection: string|null
 	collections?: string[]
 	title?: string
@@ -17,6 +15,16 @@ export interface RequestType {
 	charset?: string
 	saveOptions?: object
 }
+
+interface RequestTypeWithKey extends BaseRequestType {
+	parentItemKey: string
+}
+
+interface RequestTypeWithID extends BaseRequestType {
+	parentItemID: number
+}
+
+export type RequestType = RequestTypeWithID | RequestTypeWithKey;
 
 export type ResponseType = ZoteroModel.Item.Any;
 
@@ -28,8 +36,14 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 	if (data.collection) {
 		data.collections = [data.collection];
 	}
-	if (!data.parentItemID && data.parentItemKey){
-		data.parentItemID = Zotero.Items.getIDFromLibraryAndKey(data.libraryID, data.parentItemKey);
+	let dataWithID: RequestTypeWithID;
+	const parentItemKey: string | undefined = (data as RequestTypeWithKey).parentItemKey;
+	if (parentItemKey) {
+		const parentItemID = Zotero.Items.getIDFromLibraryAndKey(data.libraryID, parentItemKey);
+		dataWithID = Object.assign(data, {parentItemID});
 	}
-	return await Zotero.Attachments.importFromFile(data) as ResponseType;
+	else {
+		dataWithID = data as RequestTypeWithID;
+	}
+	return await Zotero.Attachments.importFromFile(dataWithID) as ResponseType;
 }
