@@ -5,7 +5,7 @@
   "scripts": {
     "lint": "eslint . --ext .ts --fix --cache --cache-location .eslintcache/",
     "prebuild": "npm run lint",
-    "update-schemas": "for file in ./content/endpoints/*.ts ; do ./node_modules/.bin/ts-json-schema-generator -f tsconfig.json --path \"$file\" --out \"./resource/schema/$(basename ${file/\\.ts/.json})\" ; done",
+    "update-schemas": "bash -c 'for file in ./content/endpoints/*.ts ; do ./node_modules/.bin/ts-json-schema-generator -f tsconfig.json --path \"$file\" --out \"./resource/schema/$(basename ${file/\\.ts/.json})\" ; done'",
     "build": "tsc --noEmit && node esbuild.js && npm run update-schemas",
     "postbuild": "zotero-plugin-zipup build zotero-api-endpoint",
     "release": "zotero-plugin-release",
