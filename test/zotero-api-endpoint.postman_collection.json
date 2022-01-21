@@ -161,7 +161,7 @@
 									"  \"required\": [],",
 									"  \"properties\": {",
 									"    \"libraryID\": {",
-									"      \"type\": \"number\"",
+									"      \"type\": [\"number\",\"null\"]",
 									"    },",
 									"    \"groupID\": {",
 									"      \"type\": [\"number\",\"null\"]",

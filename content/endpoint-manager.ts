@@ -4,12 +4,7 @@ declare const Zotero: any;
 
 import Ajv from 'ajv';
 
-import * as addAttachmentFromFile from './endpoints/add-attachment-from-file';
-import * as getItemAttachments from './endpoints/get-item-attachments';
-import * as createItems from './endpoints/create-items';
-import * as getLibraries from './endpoints/get-libraries';
-import * as getSelection from './endpoints/get-selection';
-import * as searchLibrary from './endpoints/search-library';
+import {routes} from './routes';
 
 enum HTTP_STATUS {
 	OK = 200,
@@ -46,12 +41,9 @@ export class EndpointManager {
 	private endpoints = [];
 
 	public addEndpoints(): void {
-		this.addEndpoint('/zotero-api-endpoint/get-libraries', [HTTP_METHOD.GET], getLibraries);
-		this.addEndpoint('/zotero-api-endpoint/get-selection', [HTTP_METHOD.GET], getSelection);
-		this.addEndpoint('/zotero-api-endpoint/search-library', [HTTP_METHOD.POST], searchLibrary);
-		this.addEndpoint('/zotero-api-endpoint/create-items', [HTTP_METHOD.POST], createItems);
-		this.addEndpoint('/zotero-api-endpoint/get-item-attachments', [HTTP_METHOD.POST], getItemAttachments);
-		this.addEndpoint('/zotero-api-endpoint/add-attachment-from-file', [HTTP_METHOD.POST], addAttachmentFromFile);
+		for (const [endpointName, supportedMethods, endpoint] of routes) {
+			this.addEndpoint(endpointName, supportedMethods, endpoint);
+		}
 	}
 
 	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[], endpoint: Endpoint) {
