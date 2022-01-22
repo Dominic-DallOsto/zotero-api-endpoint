@@ -41,12 +41,12 @@ export class EndpointManager {
 	private endpoints = [];
 
 	public addEndpoints(): void {
-		for (const [endpointName, supportedMethods, endpoint] of routes) {
-			this.addEndpoint(endpointName, supportedMethods, endpoint);
+		for (const [endpointName, supportedMethods, endpoint, schemaFile] of routes) {
+			this.addEndpoint(endpointName, supportedMethods, endpoint, schemaFile);
 		}
 	}
 
-	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[], endpoint: Endpoint) {
+	private addEndpoint(endpointName: string, supportedMethods: HTTP_METHOD[], endpoint: Endpoint, schemaFile: string) {
 		this.endpoints.push(endpointName);
 
 		// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -54,8 +54,6 @@ export class EndpointManager {
 			return {
 				supportedMethods,
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
-					const endpointBaseName = endpointName.split('/').pop();
-					const schemaFile = `resource://zotero-api-endpoint/schema/${endpointBaseName}.json`;
 					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile) as string) as object;
 					const ref = '#/definitions/RequestType';
 					const options = {strict: false, validateSchema: false};
