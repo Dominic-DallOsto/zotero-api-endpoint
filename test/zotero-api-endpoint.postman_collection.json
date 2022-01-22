@@ -40,7 +40,7 @@
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/get-libraries",
+					"name": "localhost:23119/zotero-api-endpoint/library/list",
 					"event": [
 						{
 							"listen": "test",
@@ -62,7 +62,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -85,21 +85,22 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/get-libraries",
+							"raw": "localhost:23119/zotero-api-endpoint/library/list",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"get-libraries"
+								"library",
+								"list"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/create-items",
+					"name": "localhost:23119/zotero-api-endpoint/item/create",
 					"event": [
 						{
 							"listen": "test",
@@ -113,7 +114,7 @@
 									"};",
 									"// https://easy-json-schema.github.io/",
 									"console.log(pm.response);",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -136,21 +137,22 @@
 							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"collections\": null,\n\t\"items\": [  {\n        \"key\": \"TPURWBEY\",\n        \"version\": 31060,\n        \"itemType\": \"book\",\n        \"url\": \"https://www.rechtssoziologie.info/literatur/michael-wrase-christian-boulanger-hg.-die-politik-des-verfassungsrechts\",\n        \"rights\": \"All rights reserved\",\n        \"series\": \"Recht und Gesellschaft\",\n        \"edition\": \"1. Aufl\",\n        \"place\": \"Baden-Baden\",\n        \"publisher\": \"Nomos-Verl\",\n        \"ISBN\": \"978-3-8487-0495-8\",\n        \"date\": \"2013\",\n        \"extra\": \"OCLC: 862984249\",\n        \"seriesNumber\": \"6\",\n        \"libraryCatalog\": \"Gemeinsamer Bibliotheksverbund ISBN\",\n        \"language\": \"ger eng\",\n        \"title\": \"Die Politik des Verfassungsrechts: interdisziplinäre und vergleichende Perspektiven auf die Rolle und Funktion von Verfassungsgerichten\",\n        \"shortTitle\": \"Die Politik des Verfassungsrechts\",\n        \"numPages\": \"345\",\n        \"creators\": [\n            {\n                \"firstName\": \"Michael\",\n                \"lastName\": \"Wrase\",\n                \"creatorType\": \"editor\"\n            },\n            {\n                \"firstName\": \"Christian\",\n                \"lastName\": \"Boulanger\",\n                \"creatorType\": \"editor\"\n            }\n        ],\n        \"tags\": [\n            {\n                \"tag\": \"Deutschland\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Kongress\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Österreich\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Schweiz\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Ungarn\",\n                \"type\": 1\n            },\n            {\n                \"tag\": \"Verfassungsgerichtsbarkeit\",\n                \"type\": 1\n            }\n        ],\n        \"collections\": [],\n        \"relations\": {\n            \"owl:sameAs\": [\n                \"http://zotero.org/groups/1137215/items/XGCH7BC7\",\n                \"http://zotero.org/groups/2612021/items/VULKIGYV\",\n                \"http://zotero.org/groups/495788/items/YILIEJZR\"\n            ],\n            \"dc:relation\": [\n                \"http://zotero.org/users/39226/items/UZLXMA3B\"\n            ]\n        },\n        \"dateAdded\": \"2017-05-04T09:32:20Z\",\n        \"dateModified\": \"2019-01-21T13:48:54Z\"\n    }]\n}"
 						},
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/create-items",
+							"raw": "localhost:23119/zotero-api-endpoint/item/create",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"create-items"
+								"item",
+								"create"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/get-selection",
+					"name": "localhost:23119/zotero-api-endpoint/selection/get",
 					"event": [
 						{
 							"listen": "test",
@@ -181,7 +183,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -200,21 +202,22 @@
 							}
 						],
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/get-selection",
+							"raw": "localhost:23119/zotero-api-endpoint/selection/get",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"get-selection"
+								"selection",
+								"get"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/search-library",
+					"name": "localhost:23119/zotero-api-endpoint/library/search",
 					"event": [
 						{
 							"listen": "test",
@@ -320,7 +323,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"",
@@ -344,21 +347,22 @@
 							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"query\": {\n\t\t\"creator\": [\"contains\", \"boulanger\"]\n\t},\n\t\"resultType\": \"items\"\n}"
 						},
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/search-library",
+							"raw": "localhost:23119/zotero-api-endpoint/library/search",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"search-library"
+								"library",
+								"search"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/get-item-attachments",
+					"name": "localhost:23119/zotero-api-endpoint/attachment/get",
 					"event": [
 						{
 							"listen": "test",
@@ -427,7 +431,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});"
 								],
@@ -448,21 +452,22 @@
 							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"keys\": [\"{{itemID}}\"]\n}"
 						},
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/get-item-attachments",
+							"raw": "localhost:23119/zotero-api-endpoint/attachment/get",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"get-item-attachments"
+								"attachment",
+								"get"
 							]
 						}
 					},
 					"response": []
 				},
 				{
-					"name": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
+					"name": "localhost:23119/zotero-api-endpoint/attachment/add",
 					"event": [
 						{
 							"listen": "test",
@@ -474,6 +479,7 @@
 									"var schema = {",
 									"  \"type\": \"object\",",
 									"  \"required\": [],",
+									"  \"additionalProperties\": false,",
 									"  \"properties\": {",
 									"    \"key\": {",
 									"      \"type\": \"string\"",
@@ -522,7 +528,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid',() => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});"
 								],
@@ -554,14 +560,15 @@
 							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"/home/zotero/test/blank.txt\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemKey\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
 						},
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
+							"raw": "localhost:23119/zotero-api-endpoint/attachment/add",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"add-attachment-from-file"
+								"attachment",
+								"add"
 							]
 						}
 					},
