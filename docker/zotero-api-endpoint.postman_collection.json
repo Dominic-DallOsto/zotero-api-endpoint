@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "Interactive tests with zotero.org group",
+			"name": "api",
 			"item": [
 				{
 					"name": "Nonexistent endpoint",
@@ -67,7 +67,7 @@
 									"});",
 									"var jsonData = pm.response.json();",
 									"for (let lib of jsonData) {",
-									"    if (lib.libraryID === 1){",
+									"    if (lib.groupID === 4562844){",
 									"        pm.globals.set(\"libraryID\", lib.libraryID);",
 									"    }",
 									"}"
@@ -161,7 +161,7 @@
 									"  \"required\": [],",
 									"  \"properties\": {",
 									"    \"libraryID\": {",
-									"      \"type\": [\"number\",\"null\"]",
+									"      \"type\": \"number\"",
 									"    },",
 									"    \"groupID\": {",
 									"      \"type\": [\"number\",\"null\"]",
@@ -183,9 +183,7 @@
 									"// https://easy-json-schema.github.io/",
 									"pm.test('Schema is valid', function () {",
 									"    pm.response.to.have.jsonSchema(schema);",
-									"});",
-									"var jsonData = pm.response.json();",
-									"pm.globals.set(\"selection\", jsonData);"
+									"});"
 								],
 								"type": "text/javascript"
 							}
@@ -456,112 +454,6 @@
 							"path": [
 								"zotero-api-endpoint",
 								"get-item-attachments"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
-					"event": [
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {",
-									"    pm.response.to.have.status(200);",
-									"});",
-									"var schema = {",
-									"  \"type\": \"object\",",
-									"  \"required\": [],",
-									"  \"properties\": {",
-									"    \"key\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"version\": {",
-									"      \"type\": \"number\"",
-									"    },",
-									"    \"itemType\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"title\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"parentItem\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"linkMode\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"contentType\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"charset\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"filename\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"tags\": {",
-									"      \"type\": \"array\",",
-									"      \"items\": {",
-									"        \"type\": \"string\"",
-									"      }",
-									"    },",
-									"    \"relations\": {",
-									"      \"type\": \"object\",",
-									"      \"required\": [],",
-									"      \"properties\": {}",
-									"    },",
-									"    \"dateAdded\": {",
-									"      \"type\": \"string\"",
-									"    },",
-									"    \"dateModified\": {",
-									"      \"type\": \"string\"",
-									"    }",
-									"  }",
-									"};",
-									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
-									"    pm.response.to.have.jsonSchema(schema);",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"let selection = pm.globals.get(\"selection\");",
-									"pm.variables.set(\"libraryID\", selection.libraryID)",
-									"pm.variables.set(\"parentItemKey\", selection.selectedItems[0].key);"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Content-Type",
-								"value": "application/json"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"/home/zotero/test/blank.txt\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemKey\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
-						},
-						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
-							"host": [
-								"localhost"
-							],
-							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"add-attachment-from-file"
 							]
 						}
 					},
