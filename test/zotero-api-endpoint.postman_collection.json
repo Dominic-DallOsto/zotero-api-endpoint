@@ -62,7 +62,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -113,7 +113,7 @@
 									"};",
 									"// https://easy-json-schema.github.io/",
 									"console.log(pm.response);",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -181,7 +181,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"var jsonData = pm.response.json();",
@@ -320,7 +320,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});",
 									"",
@@ -427,7 +427,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid', () => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});"
 								],
@@ -474,6 +474,7 @@
 									"var schema = {",
 									"  \"type\": \"object\",",
 									"  \"required\": [],",
+									"  \"additionalProperties\": false,",
 									"  \"properties\": {",
 									"    \"key\": {",
 									"      \"type\": \"string\"",
@@ -522,7 +523,7 @@
 									"  }",
 									"};",
 									"// https://easy-json-schema.github.io/",
-									"pm.test('Schema is valid', function () {",
+									"pm.test('Schema is valid',() => {",
 									"    pm.response.to.have.jsonSchema(schema);",
 									"});"
 								],
@@ -554,14 +555,15 @@
 							"raw": "{\n\t\"libraryID\":{{libraryID}},\n\t\"file\": \"/home/zotero/test/blank.txt\",\n\t\"fileBaseName\": \"Attachment2\",\n\t\"parentItemKey\": \"{{parentItemKey}}\",\n\t\"collection\": null\n}"
 						},
 						"url": {
-							"raw": "localhost:23119/zotero-api-endpoint/add-attachment-from-file",
+							"raw": "localhost:23119/zotero-api-endpoint/attachment/add",
 							"host": [
 								"localhost"
 							],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",
-								"add-attachment-from-file"
+								"attachment",
+								"add"
 							]
 						}
 					},
