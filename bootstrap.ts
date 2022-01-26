@@ -43,8 +43,6 @@ class ZoteroApiEndpoint {
 	public async startup(_data: BootstrapData, _reason: Reason) {
 		const window = await this.waitForWindow() as {Zotero: any};
 
-		/* eslint-disable no-console */
-		console.log(`Now that the window has loaded, we can access Zotero: ${window.Zotero}`);
 		// If we load a module as a subscript, it will have access to Zotero as a global variable
 		Services.scriptloader.loadSubScript('chrome://zotero-api-endpoint/content/endpoint-manager.js', window);
 	}
