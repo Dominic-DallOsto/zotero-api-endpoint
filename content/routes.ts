@@ -6,6 +6,7 @@ import * as searchLibrary from './endpoints/search-library';
 import * as addAttachmentFromFile from './endpoints/add-attachment-from-file';
 import * as getItemAttachments from './endpoints/get-item-attachments';
 import * as createItems from './endpoints/create-items';
+import * as getVersion from './endpoints/get-version';
 
 export enum HTTP_METHOD {
 	GET = 'GET',
@@ -25,4 +26,5 @@ export const routes: EndpointList = [
 	['/zotero-api-endpoint/library/list', [HTTP_METHOD.GET], getLibraries, 'resource://zotero-api-endpoint/schema/get-libraries.json'],
 	['/zotero-api-endpoint/library/search', [HTTP_METHOD.POST], searchLibrary, 'resource://zotero-api-endpoint/schema/search-library.json'],
 	['/zotero-api-endpoint/selection/get', [HTTP_METHOD.GET], getSelection, 'resource://zotero-api-endpoint/schema/get-selection.json'],
+	['/zotero-api-endpoint/version', [HTTP_METHOD.GET], getVersion, 'resource://zotero-api-endpoint/schema/get-version.json'],
 ];
