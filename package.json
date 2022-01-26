@@ -1,6 +1,6 @@
 {
   "name": "zotero-api-endpoint",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Provides an HTTP server endpoint for interacting with Zotero",
   "scripts": {
     "lint": "eslint . --ext .ts --fix --cache --cache-location .eslintcache/",
