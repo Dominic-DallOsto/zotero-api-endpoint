@@ -1,7 +1,7 @@
 declare const Zotero: any;
 
 import {Zotero as ZoteroModel} from '../zotero-datamodel';
-import { getAttachmentPath } from '../utils';
+import {getAttachmentPath} from '../utils';
 
 type integer = number;
 
@@ -10,10 +10,12 @@ export interface RequestType {
 	keys: string[]
 }
 
+type ZoteroModelWithFilePath = ZoteroModel.Item.Any & {
+	filepath?: string
+};
+
 export type ResponseType = {
-	[key: string]: ZoteroModel.Item.Any & {
-		filepath?: string
-	}
+	[key: string]: ZoteroModelWithFilePath[]
 };
 
 /**
@@ -31,14 +33,15 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 		if (!item) {
 			throw new Error(`No item with key ${key} exists.`);
 		}
-		attachmentsMap[key] = item.getAttachments().map(async id => {
+		attachmentsMap[key] = [];
+		for (const id of item.getAttachments()) {
 			const attachment = Zotero.Items.get(id);
-			const result = attachment.toJSON();
+			const itemData = attachment.toJSON() as ZoteroModelWithFilePath;
 			if (attachment.isFileAttachment()) {
-				result.filepath = await getAttachmentPath(item as {getFilePath: () => string});
+				itemData.filepath = await getAttachmentPath(attachment as { getFilePath: () => string });
 			}
-			return result as string;
-		});
+			attachmentsMap[key].push(itemData);
+		}
 	}
 	return attachmentsMap;
 }

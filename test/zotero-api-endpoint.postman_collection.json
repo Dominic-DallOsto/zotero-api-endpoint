@@ -408,7 +408,7 @@
 									"          \"tags\": {",
 									"            \"type\": \"array\",",
 									"            \"items\": {",
-									"              \"type\": \"string\"",
+									"              \"type\": \"object\"",
 									"            }",
 									"          },",
 									"          \"relations\": {",
