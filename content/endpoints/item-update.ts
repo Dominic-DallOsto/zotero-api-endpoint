@@ -1,11 +1,10 @@
 declare const Zotero: any;
 
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
 type integer = number;
 
 export interface RequestType {
 	libraryID: integer
-	items: ZoteroModel.Item.Any[]
+	items: {[key:string]:any}[] // cannot be Zotero.Item.Any because item data can be incomplete
 }
 
 export type ResponseType = string;
