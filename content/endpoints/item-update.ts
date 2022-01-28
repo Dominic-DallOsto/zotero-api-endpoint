@@ -3,11 +3,11 @@ declare const Zotero: any;
 type integer = number;
 
 interface ItemUpdateData {
-	key: string,
-	creators?: { creatorType: string, name?: string, firstName?: string, lastName?: string }[],
-	tags?: string[],
-	collections?: string[],
-	relations?: Record<'owl:sameAs' | 'dc:replaces' | 'dc:relation', string>,
+	key: string
+	creators?: { creatorType: string, name?: string, firstName?: string, lastName?: string }[]
+	tags?: string[]
+	collections?: string[]
+	relations?: Record<'owl:sameAs' | 'dc:replaces' | 'dc:relation', string>
 	[key:string]:any
 }
 
