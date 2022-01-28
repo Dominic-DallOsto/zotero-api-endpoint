@@ -2,9 +2,18 @@ declare const Zotero: any;
 
 type integer = number;
 
+interface ItemUpdateData {
+	key: string,
+	creators?: { creatorType: string, name?: string, firstName?: string, lastName?: string }[],
+	tags?: string[],
+	collections?: string[],
+	relations?: Record<'owl:sameAs' | 'dc:replaces' | 'dc:relation', string>,
+	[key:string]:any
+}
+
 export interface RequestType {
 	libraryID: integer
-	items: {[key:string]:any}[] // cannot be Zotero.Item.Any because item data can be incomplete
+	items: ItemUpdateData[] // cannot be Zotero.Item.Any because item data can be incomplete
 }
 
 export type ResponseType = string;
