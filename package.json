@@ -39,7 +39,7 @@
     "ts-json-schema-generator": "^0.97.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4",
-    "zotero-plugin": "^1.0.62"
+    "zotero-plugin": "^1.4.1"
   },
   "xpi": {
     "name": "Api Endpoint for Zotero",
