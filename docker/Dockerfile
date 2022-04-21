@@ -2,7 +2,7 @@ FROM ubuntu:latest
 
 # install zotero
 RUN apt update && apt install -y --no-install-recommends wget sudo bash ca-certificates 
-RUN wget https://downloads.sourceforge.net/project/zotero-deb/install.sh --no-check-certificate -O - | sh
+RUN wget https://raw.githubusercontent.com/retorquere/zotero-deb/master/install.sh --no-check-certificate -O - | sh
 RUN apt update && apt install -y --no-install-recommends zotero
 
 # install XVFB as a virtual X server, Node, NPM and Newman
