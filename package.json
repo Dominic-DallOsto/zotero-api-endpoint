@@ -1,12 +1,12 @@
 {
   "name": "zotero-api-endpoint",
-  "version": "0.0.3",
+  "version": "0.0.5",
   "description": "Provides an HTTP server endpoint for interacting with Zotero",
   "scripts": {
     "lint": "eslint . --ext .ts --fix --cache --cache-location .eslintcache/",
     "prebuild": "npm run lint",
     "update-schemas": "bash -c 'for file in ./content/endpoints/*.ts ; do ./node_modules/.bin/ts-json-schema-generator -f tsconfig.json --path \"$file\" --out \"./resource/schema/$(basename ${file/\\.ts/.json})\" ; done'",
-    "build": "tsc --noEmit && node esbuild.js && npm run update-schemas",
+    "build": "npm run update-schemas && tsc --noEmit && node esbuild.js",
     "postbuild": "zotero-plugin-zipup build zotero-api-endpoint",
     "release": "zotero-plugin-release",
     "postversion": "git push --follow-tags",
@@ -39,7 +39,7 @@
     "ts-json-schema-generator": "^0.97.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.4",
-    "zotero-plugin": "^1.0.62"
+    "zotero-plugin": "^1.4.1"
   },
   "xpi": {
     "name": "Api Endpoint for Zotero",
