@@ -7,8 +7,8 @@ import * as addAttachmentFromFile from './endpoints/add-attachment-from-file';
 import * as getItemAttachments from './endpoints/get-item-attachments';
 import * as createItems from './endpoints/create-items';
 import * as getVersion from './endpoints/get-version';
-import * as item_update from './endpoints/item-update';
-import * as items from './endpoints/items';
+import * as updateItem from './endpoints/item-update';
+import * as getItems from './endpoints/get-items';
 
 export enum HTTP_METHOD {
 	GET = 'GET',
@@ -29,6 +29,6 @@ export const routes: EndpointList = [
 	['/zotero-api-endpoint/library/search', [HTTP_METHOD.POST], searchLibrary, 'resource://zotero-api-endpoint/schema/search-library.json'],
 	['/zotero-api-endpoint/selection/get', [HTTP_METHOD.GET], getSelection, 'resource://zotero-api-endpoint/schema/get-selection.json'],
 	['/zotero-api-endpoint/version', [HTTP_METHOD.GET], getVersion, 'resource://zotero-api-endpoint/schema/get-version.json'],
-	['/zotero-api-endpoint/item/update', [HTTP_METHOD.POST], item_update, 'resource://zotero-api-endpoint/schema/item-update.json'],
-	['/zotero-api-endpoint/items', [HTTP_METHOD.POST], items, 'resource://zotero-api-endpoint/schema/items.json'],
+	['/zotero-api-endpoint/item/update', [HTTP_METHOD.POST], updateItem, 'resource://zotero-api-endpoint/schema/item-update.json'],
+	['/zotero-api-endpoint/items', [HTTP_METHOD.POST], getItems, 'resource://zotero-api-endpoint/schema/items.json'],
 ];
