@@ -18,6 +18,70 @@
       "properties": {
         "items": {
           "items": {
+            "properties": {
+              "collections": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "creators": {
+                "items": {
+                  "additionalProperties": false,
+                  "properties": {
+                    "creatorType": {
+                      "type": "string"
+                    },
+                    "firstName": {
+                      "type": "string"
+                    },
+                    "lastName": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "creatorType"
+                  ],
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              "key": {
+                "type": "string"
+              },
+              "relations": {
+                "additionalProperties": false,
+                "properties": {
+                  "dc:relation": {
+                    "type": "string"
+                  },
+                  "dc:replaces": {
+                    "type": "string"
+                  },
+                  "owl:sameAs": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "owl:sameAs",
+                  "dc:replaces",
+                  "dc:relation"
+                ],
+                "type": "object"
+              },
+              "tags": {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [
+              "key"
+            ],
             "type": "object"
           },
           "type": "array"
