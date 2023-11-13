@@ -94,29 +94,6 @@ async function waitForZotero() {
 	await Zotero.initializationPromise;
 }
 
-// Loads default preferences from prefs.js in Zotero 6
-function setDefaultPrefs(rootURI) {
-	var branch = Services.prefs.getDefaultBranch('');
-	var obj = {
-		pref(pref, value) {
-			switch (typeof value) {
-				case 'boolean':
-					branch.setBoolPref(pref, value);
-					break;
-				case 'string':
-					branch.setStringPref(pref, value);
-					break;
-				case 'number':
-					branch.setIntPref(pref, value);
-					break;
-				default:
-					Zotero.logError(`Invalid type '${typeof(value)}' for pref '${pref}'`);
-			}
-		},
-	};
-	Services.scriptloader.loadSubScript(`${rootURI}prefs.js`, obj);
-}
-
 class ZoteroApiEndpoint {
 	public async install(_data: BootstrapData, _reason: Reason) {
 		await waitForZotero();
@@ -135,11 +112,6 @@ class ZoteroApiEndpoint {
 		}
 
 		log(`rootURI: ${rootURI}`);
-
-		// Read prefs from prefs.js when the plugin in Zotero 6
-		if (Zotero.platformMajorVersion < 102) { // eslint-disable-line @typescript-eslint/no-magic-numbers
-			setDefaultPrefs(rootURI);
-		}
 
 		if (Zotero.platformMajorVersion >= 102) { // eslint-disable-line @typescript-eslint/no-magic-numbers
 			log('set handlers');
