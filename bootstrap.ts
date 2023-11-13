@@ -1,8 +1,16 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
+/* eslint-disable prefer-arrow/prefer-arrow-functions, no-var, @typescript-eslint/no-unused-vars, no-caller */
 
-declare const Services: any;
+declare const dump: (msg: string) => void;
 declare const Components: any;
-Components.utils.import('resource://gre/modules/Services.jsm');
+declare const ChromeUtils: any;
+declare var Services: any;
+const {
+	interfaces: Ci,
+	results: Cr,
+	utils: Cu,
+	Constructor: CC,
+	classes: Cc,
+} = Components;
 
 enum Reason {
 	APP_STARTUP     = 1, // The application is starting up.
@@ -31,56 +39,124 @@ function patch(object, method, patcher) {
 	object[method] = patcher(object[method]);
 }
 
-class ZoteroApiEndpoint {
-	public install(_data: BootstrapData, _reason: Reason) {
-		// await Zotero.Schema.schemaUpdatePromise;
+if (typeof Zotero == 'undefined') {
+	var Zotero;
+}
+
+function log(msg) {
+	Zotero.debug(`EndpointManager: (bootstrap) ${msg}`);
+}
+
+// In Zotero 6, bootstrap methods are called before Zotero is initialized, and using include.js
+// to get the Zotero XPCOM service would risk breaking Zotero startup. Instead, wait for the main
+// Zotero window to open and get the Zotero object from there.
+//
+// In Zotero 7, bootstrap methods are not called until Zotero is initialized, and the 'Zotero' is
+// automatically made available.
+async function waitForZotero() {
+	if (typeof Zotero != 'undefined') {
+		await Zotero.initializationPromise;
+		return;
 	}
 
-	public uninstall(_data: BootstrapData, _reason: Reason) {
-		// await Zotero.Schema.schemaUpdatePromise;
+	// eslint-disable-next-line @typescript-eslint/no-shadow
+	var { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
+	var windows = Services.wm.getEnumerator('navigator:browser');
+	var found = false;
+	while (windows.hasMoreElements()) {
+		const win = windows.getNext();
+		if (win.Zotero) {
+			Zotero = win.Zotero;
+			found = true;
+			break;
+		}
 	}
-
-	public async startup(_data: BootstrapData, _reason: Reason) {
-		const window = await this.waitForWindow() as {Zotero: any};
-
-		// If we load a module as a subscript, it will have access to Zotero as a global variable
-		Services.scriptloader.loadSubScript('chrome://zotero-api-endpoint/content/endpoint-manager.js', window);
-	}
-
-	async waitForWindow() {
-		return new Promise( resolve => {
-			// Check if window is already loaded
-			const windows = Services.wm.getEnumerator('navigator:browser');
-			while (windows.hasMoreElements()) {
-				resolve(windows.getNext());
-			}
-			// If not, add a listener for when the window does load
-			const windowListener = {
-				onOpenWindow: xulWindow => {
+	if (!found) {
+		await new Promise(resolve => {
+			var listener = {
+				onOpenWindow(aWindow) {
 					// Wait for the window to finish loading
-					const domWindow = xulWindow.QueryInterface(Components.interfaces.nsIInterfaceRequestor).getInterface(Components.interfaces.nsIDOMWindow);
-
-					// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-					domWindow.addEventListener('load', function listener() {
-						domWindow.removeEventListener('load', listener, false);
-						if (domWindow.document.documentElement.getAttribute('windowtype') === 'navigator:browser') {
-							resolve(domWindow);
+					const domWindow = aWindow.QueryInterface(Ci.nsIInterfaceRequestor)
+						.getInterface(Ci.nsIDOMWindowInternal || Ci.nsIDOMWindow);
+					domWindow.addEventListener('load', function() {
+						domWindow.removeEventListener('load', arguments.callee, false);
+						if (domWindow.Zotero) {
+							Services.wm.removeListener(listener);
+							Zotero = domWindow.Zotero;
+							resolve(undefined);
 						}
 					}, false);
 				},
-				onCloseWindow: _xulWindow => {},
-				onWindowTitleChange: (_xulWindow, _newTitle) => {},
 			};
-
-			// Add listener to load scripts in windows opened in the future
-			Services.wm.addListener(windowListener);
+			Services.wm.addListener(listener);
 		});
+	}
+	await Zotero.initializationPromise;
+}
+
+class ZoteroApiEndpoint {
+	public async install(_data: BootstrapData, _reason: Reason) {
+		await waitForZotero();
+		log('Installed');
+	}
+
+	public async startup({ _id, _version, resourceURI, rootURI = resourceURI.spec }) {
+		await waitForZotero();
+
+		log('Starting');
+
+		// 'Services' may not be available in Zotero 6
+		if (typeof Services == 'undefined') {
+			// eslint-disable-next-line @typescript-eslint/no-shadow
+			var { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
+		}
+
+		log(`rootURI: ${rootURI}`);
+
+		if (Zotero.platformMajorVersion >= 102) { // eslint-disable-line @typescript-eslint/no-magic-numbers
+			log('set handlers');
+			log('set resource handler');
+			const resProto = Cc['@mozilla.org/network/protocol;1?name=resource'].getService(Ci.nsISubstitutingProtocolHandler);
+			const uri = Services.io.newURI(`${rootURI  }resource/`);
+			log(`uri: ${uri}`);
+			resProto.setSubstitutionWithFlags('zotero-api-endpoint', uri, resProto.ALLOW_CONTENT_ACCESS);
+		}
+
+		// If we load a module as a subscript, it will have access to Zotero as a global variable
+		log('loading javascript');
+		var win = Zotero.getMainWindow();
+		log('test0');
+		Services.scriptloader.loadSubScript(`${rootURI}/content/endpoint-manager.js`, { Zotero });
+		log('loaded javascript');
+
+		log('startup finished');
 	}
 
 	public shutdown(_data: BootstrapData, _reason: Reason) {
-		// await Zotero.Schema.schemaUpdatePromise;
+		log('Shutting down');
+
+		if (Zotero.endpointManager) {
+			try {
+				log('remove Endpoints');
+				Zotero.endpointManager.removeEndpoints();
+				delete Zotero.endpointManager;
+				log('removed Endpoints');
+			}
+			catch (err) {
+				log(`shutdown error: ${err}`);
+			}
+		}
 	}
 
+	public uninstall(_data: BootstrapData, _reason: Reason) {
+		// `Zotero` object isn't available in `uninstall()` in Zotero 6, so log manually
+		if (typeof Zotero == 'undefined') {
+			dump('EndpointManager: Uninstalled\n\n');
+			return;
+		}
+
+		log('Uninstalled');
+	}
 }
 
 const ApiEndpoint = new ZoteroApiEndpoint;

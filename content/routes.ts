@@ -16,6 +16,7 @@ export enum HTTP_METHOD {
 }
 
 interface Endpoint {
+	// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 	endpoint: (data) => Promise<any> | any
 }
 
