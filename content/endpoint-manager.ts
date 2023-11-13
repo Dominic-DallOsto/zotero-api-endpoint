@@ -6,6 +6,9 @@ import Ajv from 'ajv';
 
 import {routes} from './routes';
 
+declare const Components: any;
+Components.utils.import('resource://gre/modules/Console.jsm');
+
 enum HTTP_STATUS {
 	OK = 200,
 	SERVER_ERROR = 500,
@@ -26,6 +29,7 @@ enum MIME_TYPE {
 
 type ResponseCallback = (status: HTTP_STATUS, type: MIME_TYPE, message: string) => void;
 
+// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 type EndpointFunction = (data) => Promise<any> | any;
 
 interface Endpoint {
@@ -42,6 +46,7 @@ export class EndpointManager {
 
 	public addEndpoints(): void {
 		for (const [endpointName, supportedMethods, endpoint, schemaFile] of routes) {
+			Zotero.debug(`add schema: ${schemaFile}`);
 			this.addEndpoint(endpointName, supportedMethods, endpoint, schemaFile);
 		}
 	}
@@ -56,7 +61,7 @@ export class EndpointManager {
 				init: async (data: any, sendResponseCallback: ResponseCallback): Promise<void> => {
 					const schema = JSON.parse(await Zotero.File.getResourceAsync(schemaFile) as string) as object;
 					const ref = '#/definitions/RequestType';
-					const options = {strict: false, validateSchema: false};
+					const options = {strict: false, validateSchema: false, logger: console};
 					const ajv = new Ajv(options);
 					ajv.compile(schema);
 					if (!ajv.validate(ref, data)) {
@@ -65,18 +70,21 @@ export class EndpointManager {
 							diagnostics: ajv.errorsText(),
 						};
 						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
+						Zotero.debug('EndpointManager: set error schema not valid');
 					}
 					try {
 						const endpointFunction: EndpointFunction = endpoint.endpoint;
 						const result = await endpointFunction(data);
 						// todo: response validation
 						sendResponseCallback(HTTP_STATUS.OK, MIME_TYPE.JSON, JSON.stringify(result));
+						Zotero.debug('EndpointManager: set repsonse ok');
 					}
 					catch (e) {
 						const result: ErrorResponse = {
 							error: e.message,
 						};
 						sendResponseCallback(HTTP_STATUS.SERVER_ERROR, MIME_TYPE.JSON, JSON.stringify(result));
+						Zotero.debug('EndpointManager: set repsonse error');
 					}
 				},
 			};
@@ -90,5 +98,5 @@ export class EndpointManager {
 	}
 }
 
-const endpointManager = new EndpointManager();
-endpointManager.addEndpoints();
+Zotero.endpointManager = Zotero.endpointManager || new EndpointManager();
+Zotero.endpointManager.addEndpoints();

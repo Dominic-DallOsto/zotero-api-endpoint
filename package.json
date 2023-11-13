@@ -1,6 +1,6 @@
 {
   "name": "zotero-api-endpoint",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Provides an HTTP server endpoint for interacting with Zotero",
   "scripts": {
     "lint": "eslint . --ext .ts --fix --cache --cache-location .eslintcache/",
@@ -26,20 +26,20 @@
   "homepage": "https://github.com/Dominic-DallOsto/zotero-api-endpoint",
   "dependencies": {
     "@types/mocha": "^9.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.9.0",
-    "@typescript-eslint/parser": "^5.9.0",
-    "ajv": "^8.9.0",
-    "esbuild": "^0.14.10",
-    "eslint": "^8.6.0",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-jsdoc": "^37.5.1",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
+    "@typescript-eslint/parser": "^6.7.3",
+    "ajv": "^8.12.0",
+    "esbuild": "^0.19.3",
+    "eslint": "^8.50.0",
+     "eslint-plugin-import": "^2.28.1",
+    "eslint-plugin-jsdoc": "^46.8.2",
     "eslint-plugin-prefer-arrow": "^1.2.3",
-    "mkdirp": "^1.0.4",
-    "rimraf": "^3.0.2",
+    "mkdirp": "^3.0.1",
+    "rimraf": "^5.0.1",
     "ts-json-schema-generator": "^0.97.0",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.4",
-    "zotero-plugin": "^1.4.1"
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2",
+    "zotero-plugin": "^2.0.9"
   },
   "xpi": {
     "name": "Api Endpoint for Zotero",
