@@ -1,12 +1,12 @@
 declare const Zotero: any;
 
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
+import { Zotero as ZoteroModel } from "../../typings/zotero-datamodel";
 type integer = number;
 
 export interface RequestType {
-	libraryID: integer
-	collections: null|string[]
-	items: object[] | string
+	libraryID: integer;
+	collections: null | string[];
+	items: object[] | string;
 }
 
 export type ResponseType = string[];
@@ -21,28 +21,29 @@ export type ResponseType = string[];
  * Returns the keys of the created items
  */
 export async function endpoint(data: RequestType): Promise<ResponseType> {
-	const {libraryID, collections, items} = data;
+	const { libraryID, collections, items } = data;
 	let zoteroItems: ZoteroModel.Item.Any[];
-	if (items[0] && typeof items[0] == 'object' && 'itemType' in items[0]) {
+	if (items[0] && typeof items[0] == "object" && "itemType" in items[0]) {
 		// items in Zotero-JSON
 		const itemIds = [];
 		for (const itemData of items as { itemType: string }[]) {
 			const item = new Zotero.Item(itemData.itemType);
 			item.libraryID = libraryID;
+			// eslint-disable-next-line prefer-const
 			for (let [key, value] of Object.entries(itemData)) {
 				switch (key) {
-					case 'itemType':
-					case 'key':
-					case 'version':
+					case "itemType":
+					case "key":
+					case "version":
 						// ignore
 						break;
-					case 'creators':
+					case "creators":
 						item.setCreators(value);
 						break;
-					case 'tags':
+					case "tags":
 						item.setTags(value);
 						break;
-					case 'collections':
+					case "collections":
 						if (collections) {
 							// if collection id is given, add to existing ones
 							// fix: is this a string or an array of strings?
@@ -50,7 +51,7 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 						}
 						item.setCollections(value);
 						break;
-					case 'relations':
+					case "relations":
 						item.setRelations(value);
 						break;
 					default:
@@ -61,8 +62,7 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 			itemIds.push(itemID);
 		}
 		zoteroItems = await Zotero.Items.getAsync(itemIds);
-	}
-	else if (typeof items == 'string') {
+	} else if (typeof items == "string") {
 		// Import items via translators
 		// adapted from https://github.com/zotero/zotero/blob/master/chrome/content/zotero/xpcom/connector/server_connector.js#L1416
 		await Zotero.Schema.schemaUpdatePromise;
@@ -70,7 +70,7 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 		translate.setString(items);
 		const translators = await translate.getTranslators();
 		if (!translators || !translators.length) {
-			throw new Error('No translator could be found for input data.');
+			throw new Error("No translator could be found for input data.");
 		}
 		translate.setTranslator(translators[0]);
 		zoteroItems = await translate.translate({
@@ -82,10 +82,8 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 				skipSelect: false,
 			},
 		});
+	} else {
+		throw new Error("Invalid items data");
 	}
-	else {
-		throw new Error('Invalid items data');
-	}
-	return zoteroItems.map(item => item.key );
+	return zoteroItems.map((item) => item.key);
 }
-

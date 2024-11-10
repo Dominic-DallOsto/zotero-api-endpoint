@@ -1,27 +1,27 @@
 declare const Zotero: any;
 
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
+import { Zotero as ZoteroModel } from "../../typings/zotero-datamodel";
 
 type integer = number;
 
 interface BaseRequestType {
-	libraryID: integer
-	file: string
-	fileBaseName: string
-	collection: string|null
-	collections?: string[]
-	title?: string
-	contentType?: string
-	charset?: string
-	saveOptions?: object
+	libraryID: integer;
+	file: string;
+	fileBaseName: string;
+	collection: string | null;
+	collections?: string[];
+	title?: string;
+	contentType?: string;
+	charset?: string;
+	saveOptions?: object;
 }
 
 interface RequestTypeWithKey extends BaseRequestType {
-	parentItemKey: string
+	parentItemKey: string;
 }
 
 interface RequestTypeWithID extends BaseRequestType {
-	parentItemID: number
+	parentItemID: number;
 }
 
 export type RequestType = RequestTypeWithID | RequestTypeWithKey;
@@ -37,13 +37,18 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 		data.collections = [data.collection];
 	}
 	let dataWithID: RequestTypeWithID;
-	const parentItemKey: string | undefined = (data as RequestTypeWithKey).parentItemKey;
+	const parentItemKey: string | undefined = (data as RequestTypeWithKey)
+		.parentItemKey;
 	if (parentItemKey) {
-		const parentItemID = Zotero.Items.getIDFromLibraryAndKey(data.libraryID, parentItemKey);
-		dataWithID = Object.assign(data, {parentItemID});
-	}
-	else {
+		const parentItemID = Zotero.Items.getIDFromLibraryAndKey(
+			data.libraryID,
+			parentItemKey,
+		);
+		dataWithID = Object.assign(data, { parentItemID });
+	} else {
 		dataWithID = data as RequestTypeWithID;
 	}
-	return await Zotero.Attachments.importFromFile(dataWithID) as ResponseType;
+	return (await Zotero.Attachments.importFromFile(
+		dataWithID,
+	)) as ResponseType;
 }

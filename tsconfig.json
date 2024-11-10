@@ -1,30 +1,14 @@
 {
 	"compilerOptions": {
-		"importHelpers": true,
-		"target": "es2017",
-		"disableSizeLimit": true,
+		"experimentalDecorators": true,
 		"module": "commonjs",
-		"noImplicitAny": false,
-		"esModuleInterop": true,
-		"removeComments": false,
-		"preserveConstEnums": false,
-		"sourceMap": false,
-		"downlevelIteration": true,
+		"target": "ES2016",
 		"resolveJsonModule": true,
-		"lib": [ "es2017", "dom" ],
-		"typeRoots": [
-			"./typings",
-			"./node_modules/@types"
-		]
+		"skipLibCheck": true,
+		"strict": true,
+		"removeComments": false,
+		"sourceMap": false
 	},
-	"include": [
-		"content/**/*",
-		"resource/**/*",
-		"*.ts"
-	],
-	"exclude": [
-		"node_modules",
-		"**/*.spec.ts",
-		"typings"
-	]
+	"include": ["src", "typings", "node_modules/zotero-types"],
+	"exclude": ["build", "addon"]
 }

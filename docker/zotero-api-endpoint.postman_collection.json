@@ -28,13 +28,9 @@
 						"header": [],
 						"url": {
 							"raw": "localhost:23119/does-not-exist",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"does-not-exist"
-							]
+							"path": ["does-not-exist"]
 						}
 					},
 					"response": []
@@ -86,14 +82,9 @@
 						],
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/get-libraries",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"get-libraries"
-							]
+							"path": ["zotero-api-endpoint", "get-libraries"]
 						}
 					},
 					"response": []
@@ -137,14 +128,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/create-items",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"create-items"
-							]
+							"path": ["zotero-api-endpoint", "create-items"]
 						}
 					},
 					"response": []
@@ -199,14 +185,9 @@
 						],
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/get-selection",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"get-selection"
-							]
+							"path": ["zotero-api-endpoint", "get-selection"]
 						}
 					},
 					"response": []
@@ -343,14 +324,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/search-library",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"search-library"
-							]
+							"path": ["zotero-api-endpoint", "search-library"]
 						}
 					},
 					"response": []
@@ -447,9 +423,7 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/get-item-attachments",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
 							"path": [
 								"zotero-api-endpoint",

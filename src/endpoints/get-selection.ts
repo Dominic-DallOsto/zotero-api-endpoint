@@ -1,17 +1,17 @@
 declare const ZoteroPane: any;
 
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
-import {getAttachmentPath} from '../utils';
+import { Zotero as ZoteroModel } from "../../typings/zotero-datamodel";
+import { getAttachmentPath } from "../modules/utils";
 
 type ZoteroItem = ZoteroModel.Item.Any;
 type integer = number;
 
 export interface ResponseType {
-	libraryID: integer
-	groupID: integer
-	selectedItems: ZoteroItem[]
-	collection: string
-	childItems: ZoteroItem[]
+	libraryID: integer;
+	groupID: integer;
+	selectedItems: ZoteroItem[];
+	collection: string;
+	childItems: ZoteroItem[];
 }
 
 export type RequestType = null;
@@ -22,7 +22,10 @@ export type RequestType = null;
 export async function endpoint(_: object): Promise<ResponseType> {
 	let selectedItems = ZoteroPane.getSelectedItems();
 	const collection = ZoteroPane.getSelectedCollection() || null;
-	const childItems = collection && selectedItems.length === 0 ? collection.getChildItems() : [];
+	const childItems =
+		collection && selectedItems.length === 0
+			? collection.getChildItems()
+			: [];
 	let libraryID = null;
 	let groupID = null;
 	if (selectedItems.length) {
@@ -32,13 +35,14 @@ export async function endpoint(_: object): Promise<ResponseType> {
 		for (const item of selectedItems) {
 			const data = item.toJSON();
 			if (item.isFileAttachment()) {
-				data.filepath = await getAttachmentPath(item as {getFilePath: () => string});
+				data.filepath = await getAttachmentPath(
+					item as { getFilePath: () => string },
+				);
 			}
 			tmp.push(data as ZoteroItem);
 		}
 		selectedItems = tmp;
-	}
-	else if (collection) {
+	} else if (collection) {
 		libraryID = collection.library.libraryID;
 		groupID = collection.library.groupID;
 	}

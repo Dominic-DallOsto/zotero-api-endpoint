@@ -1,18 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "definitions": {
-    "NamedParameters<typeof endpoint>": {
-      "additionalProperties": false,
-      "properties": {
-        "data": {
-          "$ref": "#/definitions/RequestType"
-        }
-      },
-      "required": [
-        "data"
-      ],
-      "type": "object"
-    },
     "RequestType": {
       "anyOf": [
         {
@@ -5404,6 +5392,24 @@
         "collections",
         "relations"
       ],
+      "type": "object"
+    },
+    "endpoint": {
+      "$comment": "(data: RequestType) => Promise<ResponseType>",
+      "properties": {
+        "namedArgs": {
+          "additionalProperties": false,
+          "properties": {
+            "data": {
+              "$ref": "#/definitions/RequestType"
+            }
+          },
+          "required": [
+            "data"
+          ],
+          "type": "object"
+        }
+      },
       "type": "object"
     }
   }

@@ -1,21 +1,21 @@
 declare const Zotero: any;
 
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
-import {getAttachmentPath} from '../utils';
+import { Zotero as ZoteroModel } from "../../typings/zotero-datamodel";
+import { getAttachmentPath } from "../modules/utils";
 
 type integer = number;
 
 export interface RequestType {
-	libraryID: integer
-	keys: string[]
+	libraryID: integer;
+	keys: string[];
 }
 
 type ZoteroModelWithFilePath = ZoteroModel.Item.Any & {
-	filepath?: string
+	filepath?: string;
 };
 
 export type ResponseType = {
-	[key: string]: ZoteroModelWithFilePath[]
+	[key: string]: ZoteroModelWithFilePath[];
 };
 
 /**
@@ -26,7 +26,7 @@ export type ResponseType = {
  * keys and attachment item data.
  */
 export async function endpoint(data: RequestType): Promise<ResponseType> {
-	const {libraryID, keys} = data;
+	const { libraryID, keys } = data;
 	const attachmentsMap: ResponseType = {};
 	for (const key of keys) {
 		const item = await Zotero.Items.getByLibraryAndKeyAsync(libraryID, key);
@@ -38,7 +38,9 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 			const attachment = Zotero.Items.get(id);
 			const itemData = attachment.toJSON() as ZoteroModelWithFilePath;
 			if (attachment.isFileAttachment()) {
-				itemData.filepath = await getAttachmentPath(attachment as { getFilePath: () => string });
+				itemData.filepath = await getAttachmentPath(
+					attachment as { getFilePath: () => string },
+				);
 			}
 			attachmentsMap[key].push(itemData);
 		}
