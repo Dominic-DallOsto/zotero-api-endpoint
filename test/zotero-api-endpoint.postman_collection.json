@@ -28,13 +28,9 @@
 						"header": [],
 						"url": {
 							"raw": "localhost:23119/does-not-exist",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"does-not-exist"
-							]
+							"path": ["does-not-exist"]
 						}
 					},
 					"response": []
@@ -86,15 +82,9 @@
 						],
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/library/list",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"library",
-								"list"
-							]
+							"path": ["zotero-api-endpoint", "library", "list"]
 						}
 					},
 					"response": []
@@ -138,15 +128,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/item/create",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"item",
-								"create"
-							]
+							"path": ["zotero-api-endpoint", "item", "create"]
 						}
 					},
 					"response": []
@@ -203,15 +187,9 @@
 						],
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/selection/get",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"selection",
-								"get"
-							]
+							"path": ["zotero-api-endpoint", "selection", "get"]
 						}
 					},
 					"response": []
@@ -348,15 +326,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/library/search",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"library",
-								"search"
-							]
+							"path": ["zotero-api-endpoint", "library", "search"]
 						}
 					},
 					"response": []
@@ -453,15 +425,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/attachment/get",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"attachment",
-								"get"
-							]
+							"path": ["zotero-api-endpoint", "attachment", "get"]
 						}
 					},
 					"response": []
@@ -561,15 +527,9 @@
 						},
 						"url": {
 							"raw": "localhost:23119/zotero-api-endpoint/attachment/add",
-							"host": [
-								"localhost"
-							],
+							"host": ["localhost"],
 							"port": "23119",
-							"path": [
-								"zotero-api-endpoint",
-								"attachment",
-								"add"
-							]
+							"path": ["zotero-api-endpoint", "attachment", "add"]
 						}
 					},
 					"response": []

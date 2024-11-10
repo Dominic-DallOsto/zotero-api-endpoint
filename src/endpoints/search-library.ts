@@ -1,15 +1,15 @@
 declare const Zotero: any;
 
-import {validatePostData} from '../utils';
-import {Zotero as ZoteroModel} from '../zotero-datamodel';
+import { validatePostData } from "../modules/utils";
+import { Zotero as ZoteroModel } from "../../typings/zotero-datamodel";
 
 type ZoteroItem = ZoteroModel.Item.Any;
 type integer = number;
 
 export interface RequestType {
-	libraryID: integer
-	query: object
-	resultType: 'items' | 'keys' | 'hits'
+	libraryID: integer;
+	query: object;
+	resultType: "items" | "keys" | "hits";
 }
 
 export type ResponseType = ZoteroItem[] | string[] | string;
@@ -33,14 +33,23 @@ export type ResponseType = ZoteroItem[] | string[] | string;
  * ```
  */
 export async function endpoint(data: RequestType): Promise<ResponseType> {
-	validatePostData(data, {
-		libraryID: val => typeof val == 'number' && Number.isInteger(val),
-		query: val => typeof val === 'object' && Object.entries(val as object).length > 0,
-		resultType: val => typeof val === 'string' && ['items', 'keys', 'hits'].includes(val),
-	}, "libraryID (int), query (object), resultType ('items|keys|hits')");
-	const {libraryID, query, resultType} = data;
+	validatePostData(
+		data,
+		{
+			libraryID: (val) => typeof val == "number" && Number.isInteger(val),
+			query: (val) =>
+				typeof val === "object" &&
+				Object.entries(val as object).length > 0,
+			resultType: (val) =>
+				typeof val === "string" &&
+				["items", "keys", "hits"].includes(val),
+		},
+		"libraryID (int), query (object), resultType ('items|keys|hits')",
+	);
+	const { libraryID, query, resultType } = data;
 	const search = new Zotero.Search();
 	search.libraryID = libraryID;
+	// eslint-disable-next-line prefer-const
 	for (let [field, conditions] of Object.entries(query)) {
 		if (!Array.isArray(conditions)) {
 			conditions = [conditions];
@@ -49,13 +58,12 @@ export async function endpoint(data: RequestType): Promise<ResponseType> {
 		search.addCondition(...conditions);
 	}
 	const results = await search.search();
-	if (resultType === 'hits') {
+	if (resultType === "hits") {
 		return String(results.length);
 	}
 	let items = await Zotero.Items.getAsync(results);
-	if (resultType === 'keys') {
-		items = items.map(item => item.key as string);
+	if (resultType === "keys") {
+		items = items.map((item: any) => item.key as string);
 	}
 	return items as ResponseType;
 }
-
