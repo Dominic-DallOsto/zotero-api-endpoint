@@ -33,7 +33,7 @@ jobs:
               run: docker build -t zotero docker/
 
             - name: Check Zotero version
-              run: docker run -i --rm --name zotero zotero -c "xvfb-run zotero --full-version"
+              run: docker run -i --rm --name zotero zotero
 
             # For some reason these tests only work if the container is in interactive mode and not detached...
             - name: run tests

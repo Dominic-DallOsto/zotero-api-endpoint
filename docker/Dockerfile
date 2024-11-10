@@ -17,3 +17,4 @@ RUN chown -R zotero /home/zotero/.zotero
 
 USER zotero
 WORKDIR /home/zotero
+ENTRYPOINT [ "xvfb-run", "zotero", "--full-version"]
