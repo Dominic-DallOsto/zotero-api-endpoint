@@ -10,7 +10,7 @@ RUN apt install -y --no-install-recommends xvfb nodejs npm
 RUN npm install -g newman
 
 # add a zotero user
-RUN groupadd -g 1000 zotero && useradd -m -g zotero -u 1000 zotero
+RUN groupadd -g 1001 zotero && useradd -m -g zotero -u 1001 zotero
 # add blank Zotero profile
 ADD .zotero /home/zotero/.zotero
 RUN chown -R zotero /home/zotero/.zotero
